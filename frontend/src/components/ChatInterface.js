@@ -2,9 +2,10 @@ import React, { useState, useRef, useEffect } from 'react';
 import Webcam from 'react-webcam';
 import { conversationAPI } from '../api/conversations';
 import { useAuth } from '../contexts/AuthContext';
+import WellnessRecommendations from './WellnessRecommendations';
 import toast from 'react-hot-toast';
 import styled from 'styled-components';
-import { Camera, Send, MessageCircle, User, Bot, Image as ImageIcon } from 'lucide-react';
+import { Camera, Send, MessageCircle, User, Bot, Image as ImageIcon, Heart } from 'lucide-react';
 
 const Container = styled.div`
   display: flex;
@@ -217,13 +218,27 @@ const ActionButton = styled.button`
 `;
 
 const WebcamPanel = styled.div`
-  width: 350px;
   background: white;
   border-radius: 15px;
   padding: 20px;
   display: flex;
   flex-direction: column;
   gap: 15px;
+`;
+
+const RightPanel = styled.div`
+  width: 350px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+`;
+
+const WellnessPanel = styled.div`
+  background: white;
+  border-radius: 15px;
+  padding: 20px;
+  max-height: 400px;
+  overflow-y: auto;
 `;
 
 const WebcamContainer = styled.div`
@@ -239,6 +254,9 @@ const ChatInterface = () => {
   const [currentConversation, setCurrentConversation] = useState(null);
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [currentEmotion, setCurrentEmotion] = useState(null);
+  const [currentEmotionIntensity, setCurrentEmotionIntensity] = useState(null);
+  const [wellnessRecommendations, setWellnessRecommendations] = useState([]);
   const { user, logout } = useAuth();
 
   useEffect(() => {
@@ -307,6 +325,17 @@ const ChatInterface = () => {
 
       const response = await conversationAPI.predictEmotion(formData);
       
+      // Update current emotion state for wellness recommendations
+      if (response.final_emotion && response.final_emotion !== 'neutral') {
+        setCurrentEmotion(response.final_emotion);
+        setCurrentEmotionIntensity(response.emotion_intensity);
+        
+        // Set wellness recommendations if they exist in the response
+        if (response.wellness_recommendations) {
+          setWellnessRecommendations(response.wellness_recommendations);
+        }
+      }
+      
       // Add user message
       const userMessage = {
         id: Date.now(),
@@ -316,6 +345,9 @@ const ChatInterface = () => {
         text_confidence: response.text_confidence,
         face_emotion: response.face_emotion,
         face_confidence: response.face_confidence,
+        final_emotion: response.final_emotion,
+        final_confidence: response.final_confidence,
+        emotion_intensity: response.emotion_intensity,
         created_at: new Date().toISOString(),
       };
 
@@ -400,8 +432,11 @@ const ChatInterface = () => {
                   </MessageIcon>
                   <MessageBubble isUser={message.is_user_message}>
                     {message.content}
-                    {message.is_user_message && (message.text_emotion || message.face_emotion) && (
+                    {message.is_user_message && (message.final_emotion || message.text_emotion || message.face_emotion) && (
                       <EmotionInfo>
+                        {message.final_emotion && (
+                          <div><strong>Final:</strong> {message.final_emotion} ({(message.final_confidence * 100).toFixed(1)}%) - {message.emotion_intensity}</div>
+                        )}
                         {message.text_emotion && (
                           <div>Text: {message.text_emotion} ({(message.text_confidence * 100).toFixed(1)}%)</div>
                         )}
@@ -431,25 +466,38 @@ const ChatInterface = () => {
             </InputPanel>
           </MessagesPanel>
 
-          <WebcamPanel>
-            <h3 style={{ margin: '0 0 10px 0', color: '#333' }}>
-              <Camera size={20} style={{ marginRight: '8px', verticalAlign: 'middle' }} />
-              Camera Feed
-            </h3>
-            <WebcamContainer>
-              <Webcam
-                audio={false}
-                ref={webcamRef}
-                screenshotFormat="image/jpeg"
-                width="100%"
-                height={240}
-                videoConstraints={{ facingMode: 'user' }}
+          <RightPanel>
+            <WellnessPanel>
+              <h3 style={{ margin: '0 0 15px 0', color: '#333', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Heart size={20} />
+                Wellness Recommendations
+              </h3>
+              <WellnessRecommendations 
+                currentEmotion={currentEmotion}
+                emotionIntensity={currentEmotionIntensity}
               />
-            </WebcamContainer>
-            <p style={{ margin: 0, fontSize: '0.9em', color: '#666', textAlign: 'center' }}>
-              Your camera feed is used for emotion detection
-            </p>
-          </WebcamPanel>
+            </WellnessPanel>
+            
+            <WebcamPanel>
+              <h3 style={{ margin: '0 0 10px 0', color: '#333' }}>
+                <Camera size={20} style={{ marginRight: '8px', verticalAlign: 'middle' }} />
+                Camera Feed
+              </h3>
+              <WebcamContainer>
+                <Webcam
+                  audio={false}
+                  ref={webcamRef}
+                  screenshotFormat="image/jpeg"
+                  width="100%"
+                  height={240}
+                  videoConstraints={{ facingMode: 'user' }}
+                />
+              </WebcamContainer>
+              <p style={{ margin: 0, fontSize: '0.9em', color: '#666', textAlign: 'center' }}>
+                Your camera feed is used for emotion detection
+              </p>
+            </WebcamPanel>
+          </RightPanel>
         </ChatArea>
       </MainContent>
     </Container>

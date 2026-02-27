@@ -4,16 +4,20 @@ import { useAuth } from '../contexts/AuthContext';
 import './Chat.css';
 
 const SimpleProtectedRoute = ({ children }) => {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading, initialized } = useAuth();
 
-  if (loading) {
+  // Show loading while authentication is being initialized
+  if (loading || !initialized) {
     return (
       <div className="loading-container">
         <div className="loading-spinner"></div>
+        <p>Loading...</p>
       </div>
     );
   }
 
+  // Only redirect to login if authentication has been fully initialized
+  // and user is definitely not authenticated
   return isAuthenticated ? children : <Navigate to="/login" replace />;
 };
 

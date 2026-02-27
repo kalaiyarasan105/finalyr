@@ -107,10 +107,27 @@ const ConversationHistory = ({ onSelectConversation }) => {
 
   const filteredAndSortedConversations = conversations
     .filter(conv => {
-      const matchesSearch = conv.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (conv.messages || []).some(m => 
-          m.content.toLowerCase().includes(searchTerm.toLowerCase())
-        );
+      // If no search term, just check emotion filter
+      if (!searchTerm || searchTerm.trim() === '') {
+        const matchesEmotion = filterEmotion === 'all' || 
+          conv.dominantEmotion === filterEmotion;
+        return matchesEmotion;
+      }
+
+      // Search in title
+      const searchLower = searchTerm.toLowerCase().trim();
+      const titleMatch = conv.title && conv.title.toLowerCase().includes(searchLower);
+      
+      // Search in messages
+      const messageMatch = (conv.messages || []).some(m => 
+        m.content && m.content.toLowerCase().includes(searchLower)
+      );
+
+      // Search in emotions
+      const emotionMatch = conv.dominantEmotion && 
+        conv.dominantEmotion.toLowerCase().includes(searchLower);
+
+      const matchesSearch = titleMatch || messageMatch || emotionMatch;
       
       const matchesEmotion = filterEmotion === 'all' || 
         conv.dominantEmotion === filterEmotion;
@@ -168,6 +185,7 @@ const ConversationHistory = ({ onSelectConversation }) => {
 
       <div className="history-controls">
         <div className="search-box">
+          <span className="search-icon">🔍</span>
           <input
             type="text"
             placeholder="Search conversations..."
@@ -175,7 +193,27 @@ const ConversationHistory = ({ onSelectConversation }) => {
             onChange={(e) => setSearchTerm(e.target.value)}
             className="search-input"
           />
-          <span className="search-icon">🔍</span>
+          {searchTerm && (
+            <button
+              className="clear-search"
+              onClick={() => setSearchTerm('')}
+              title="Clear search"
+              style={{
+                position: 'absolute',
+                right: '12px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                fontSize: '18px',
+                color: '#6b7280',
+                padding: '4px'
+              }}
+            >
+              ✕
+            </button>
+          )}
         </div>
 
         <div className="filter-controls">
@@ -203,6 +241,40 @@ const ConversationHistory = ({ onSelectConversation }) => {
           </select>
         </div>
       </div>
+
+      {(searchTerm || filterEmotion !== 'all') && (
+        <div style={{
+          padding: '12px 24px',
+          background: '#f3f4f6',
+          borderRadius: '8px',
+          marginBottom: '20px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between'
+        }}>
+          <span style={{ color: '#6b7280', fontSize: '14px' }}>
+            Showing {filteredAndSortedConversations.length} of {conversations.length} conversations
+            {searchTerm && ` matching "${searchTerm}"`}
+            {filterEmotion !== 'all' && ` with ${filterEmotion} emotion`}
+          </span>
+          <button
+            onClick={() => {
+              setSearchTerm('');
+              setFilterEmotion('all');
+            }}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: '#6366f1',
+              cursor: 'pointer',
+              fontSize: '14px',
+              fontWeight: '500'
+            }}
+          >
+            Clear filters
+          </button>
+        </div>
+      )}
 
       <div className="conversations-grid">
         {filteredAndSortedConversations.length > 0 ? (

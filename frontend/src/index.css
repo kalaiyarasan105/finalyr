@@ -1,13 +1,283 @@
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply font-sans antialiased;
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+      'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+      sans-serif;
+  }
+
+  code {
+    @apply font-mono;
+    font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+      monospace;
+  }
+
+  /* Dark mode support */
+  .dark {
+    @apply bg-gray-900 text-white;
+  }
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+@layer components {
+  /* Custom button styles */
+  .btn-primary {
+    @apply bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200;
+  }
+
+  .btn-secondary {
+    @apply bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-medium py-2 px-4 rounded-lg transition-colors duration-200;
+  }
+
+  .btn-danger {
+    @apply bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200;
+  }
+
+  /* Card styles */
+  .card {
+    @apply bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700;
+  }
+
+  .card-hover {
+    @apply card hover:shadow-lg transition-shadow duration-200;
+  }
+
+  /* Form styles */
+  .form-input {
+    @apply w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white;
+  }
+
+  .form-label {
+    @apply block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2;
+  }
+
+  /* Loading states */
+  .loading-spinner {
+    @apply animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600;
+  }
+
+  /* Navigation specific styles */
+  .nav-collapse-btn {
+    @apply p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100;
+  }
+
+  .nav-item {
+    @apply w-full flex items-center gap-3 p-3 rounded-lg transition-all duration-200;
+  }
+
+  .nav-item-active {
+    @apply bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 shadow-sm border-l-4 border-blue-600;
+  }
+
+  .nav-item-inactive {
+    @apply text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100;
+  }
+
+  /* Improved contrast for better accessibility */
+  .text-high-contrast {
+    @apply text-gray-900 dark:text-gray-100;
+  }
+
+  .text-medium-contrast {
+    @apply text-gray-700 dark:text-gray-300;
+  }
+
+  .text-low-contrast {
+    @apply text-gray-600 dark:text-gray-400;
+  }
+
+  .bg-high-contrast {
+    @apply bg-white dark:bg-gray-800;
+  }
+
+  .bg-medium-contrast {
+    @apply bg-gray-50 dark:bg-gray-700;
+  }
+
+  .border-contrast {
+    @apply border-gray-200 dark:border-gray-600;
+  }
+}
+
+@layer utilities {
+  /* Custom animations */
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-in-out;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.3s ease-out;
+  }
+
+  .animate-bounce-soft {
+    animation: bounceSoft 2s infinite;
+  }
+
+  .animate-pulse-soft {
+    animation: pulseSoft 2s infinite;
+  }
+
+  /* Navigation width transitions */
+  .nav-expanded {
+    width: 16rem;
+  }
+
+  .nav-collapsed {
+    width: 4rem;
+  }
+
+  .nav-transition {
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Text fade animations for collapse */
+  .text-fade-in {
+    opacity: 1;
+    transition: opacity 0.2s ease-in-out 0.1s;
+  }
+
+  .text-fade-out {
+    opacity: 0;
+    transition: opacity 0.1s ease-in-out;
+  }
+}
+
+/* Keyframe animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes bounceSoft {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-5px);
+  }
+  60% {
+    transform: translateY(-3px);
+  }
+}
+
+@keyframes pulseSoft {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+/* Color Therapy - Emotion-based backgrounds */
+@layer utilities {
+  /* Joy/Happy - Warm yellows and oranges */
+  .emotion-joy {
+    background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 50%, #FCD34D 100%);
+  }
+
+  /* Sadness - Cool blues with warmth */
+  .emotion-sadness {
+    background: linear-gradient(135deg, #DBEAFE 0%, #BFDBFE 50%, #93C5FD 100%);
+  }
+
+  /* Anger - Controlled reds with calming tones */
+  .emotion-anger {
+    background: linear-gradient(135deg, #FEE2E2 0%, #FECACA 50%, #FCA5A5 100%);
+  }
+
+  /* Fear/Anxiety - Soft purples for calm */
+  .emotion-fear {
+    background: linear-gradient(135deg, #EDE9FE 0%, #DDD6FE 50%, #C4B5FD 100%);
+  }
+
+  /* Surprise - Bright and energetic */
+  .emotion-surprise {
+    background: linear-gradient(135deg, #FCE7F3 0%, #FBCFE8 50%, #F9A8D4 100%);
+  }
+
+  /* Disgust - Earthy greens */
+  .emotion-disgust {
+    background: linear-gradient(135deg, #D1FAE5 0%, #A7F3D0 50%, #6EE7B7 100%);
+  }
+
+  /* Neutral - Soft grays */
+  .emotion-neutral {
+    background: linear-gradient(135deg, #F9FAFB 0%, #F3F4F6 50%, #E5E7EB 100%);
+  }
+
+  /* Smooth color transitions */
+  .color-transition {
+    transition: background 2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Backdrop blur for readability */
+  .therapy-overlay {
+    backdrop-filter: blur(8px);
+    background-color: rgba(255, 255, 255, 0.3);
+  }
+}
+
+/* Recommendation card animations */
+@keyframes cardEntrance {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes cardHover {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-5px);
+  }
+}
+
+.recommendation-card {
+  animation: cardEntrance 0.5s ease-out;
+}
+
+.recommendation-card:hover {
+  animation: cardHover 0.3s ease-out forwards;
+}
+
+/* Music player progress bar animation */
+@keyframes progressPulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+.music-progress {
+  animation: progressPulse 2s ease-in-out infinite;
 }

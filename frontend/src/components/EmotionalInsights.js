@@ -145,7 +145,7 @@ const EmotionalInsights = ({ onNavigateToChat }) => {
       {/* AI Insights */}
       {insights && insights.insights && insights.insights.length > 0 ? (
         <div className="ai-insights-section">
-          <h2>🤖 AI-Generated Insights</h2>
+          <h2>AI-Generated Insights</h2>
           <div className="insights-grid">
             {insights.insights.map((insight, index) => (
               <div key={index} className="insight-card">
@@ -159,7 +159,9 @@ const EmotionalInsights = ({ onNavigateToChat }) => {
       ) : (
         <div className="no-data-section">
           <div className="no-data-card">
-            <div className="no-data-icon">💬</div>
+            <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full mx-auto mb-4 flex items-center justify-center">
+              <div className="w-8 h-8 bg-gray-300 dark:bg-gray-600 rounded-full"></div>
+            </div>
             <h3>Start Chatting to Generate Insights!</h3>
             <p>
               Once you have some conversations with the AI, you'll see personalized 
@@ -177,7 +179,7 @@ const EmotionalInsights = ({ onNavigateToChat }) => {
                 cursor: 'pointer'
               }}
             >
-              💬 Start Your First Chat
+              Start Your First Chat
             </button>
           </div>
         </div>
@@ -186,7 +188,7 @@ const EmotionalInsights = ({ onNavigateToChat }) => {
       <div className="insights-content">
         {/* Emotion Distribution */}
         <div className="insight-section">
-          <h2>📊 Emotion Distribution</h2>
+          <h2>Emotion Distribution</h2>
           <div className="emotion-chart">
             {Object.entries(analytics.emotion_distribution || {})
               .sort(([,a], [,b]) => b.count - a.count)
@@ -216,7 +218,7 @@ const EmotionalInsights = ({ onNavigateToChat }) => {
 
         {/* Confidence Analysis */}
         <div className="insight-section">
-          <h2>🎯 Detection Confidence</h2>
+          <h2>Detection Confidence</h2>
           <div className="confidence-analysis">
             <div className="confidence-overview">
               <div className="confidence-metric">
@@ -261,16 +263,16 @@ const EmotionalInsights = ({ onNavigateToChat }) => {
 
         {/* Intensity Analysis */}
         <div className="insight-section">
-          <h2>⚡ Emotion Intensity Patterns</h2>
+          <h2>Emotion Intensity Patterns</h2>
           <div className="intensity-analysis">
             <div className="intensity-overview">
               {Object.entries(analytics.intensity_analysis?.overall_distribution || {}).map(([intensity, count]) => (
                 <div key={intensity} className="intensity-card">
-                  <div className="intensity-icon">
-                    {intensity === 'high' ? '🔥' : 
-                     intensity === 'medium' ? '⚡' : 
-                     intensity === 'low' ? '💫' : '✨'}
-                  </div>
+                  <div className={`w-8 h-8 rounded-lg mb-2 ${
+                    intensity === 'high' ? 'bg-red-500' : 
+                    intensity === 'medium' ? 'bg-yellow-500' : 
+                    intensity === 'low' ? 'bg-blue-500' : 'bg-gray-500'
+                  }`}></div>
                   <div className="intensity-info">
                     <div className="intensity-name">{intensity}</div>
                     <div className="intensity-count">{count} times</div>
@@ -283,7 +285,7 @@ const EmotionalInsights = ({ onNavigateToChat }) => {
 
         {/* Fusion Method Stats */}
         <div className="insight-section">
-          <h2>🔧 Detection Methods</h2>
+          <h2>Detection Methods</h2>
           <div className="fusion-stats">
             {Object.entries(analytics.fusion_method_stats || {}).map(([method, data]) => (
               <div key={method} className="fusion-item">
@@ -308,7 +310,7 @@ const EmotionalInsights = ({ onNavigateToChat }) => {
         {/* Emotional Journey */}
         {insights && insights.emotional_journey && (
           <div className="insight-section full-width">
-            <h2>🌟 Recent Emotional Journey</h2>
+            <h2>Recent Emotional Journey</h2>
             <div className="emotional-timeline">
               {insights.emotional_journey.slice(-10).map((point, index) => (
                 <div key={index} className="timeline-point">
@@ -334,7 +336,7 @@ const EmotionalInsights = ({ onNavigateToChat }) => {
 
         {/* Conversation Patterns */}
         <div className="insight-section">
-          <h2>💬 Conversation Patterns</h2>
+          <h2>Conversation Patterns</h2>
           <div className="conversation-insights">
             <div className="pattern-grid">
               <div className="pattern-item">

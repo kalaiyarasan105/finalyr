@@ -269,6 +269,58 @@ class EmotionService:
                     ]
                 }
             },
+            "depression": {
+                "examples": [
+                    "I don't see the point in anything anymore.",
+                    "I can't get out of bed, everything feels hopeless.",
+                    "I feel empty inside, like nothing matters.",
+                    "I'm so tired of feeling this way every day."
+                ],
+                "responses": {
+                    "high": [
+                        "I can sense you're going through an incredibly difficult time right now. What you're feeling sounds like deep depression, and I want you to know that you're not alone in this darkness. Please consider reaching out to a mental health professional or crisis helpline - you deserve support and care.",
+                        "The emptiness and hopelessness you're describing are serious signs that you need and deserve professional support. Depression can make everything feel impossible, but with the right help, these feelings can change. You are valuable and worth caring for, even when you can't feel it right now.",
+                    ],
+                    "medium": [
+                        "It sounds like you're experiencing symptoms of depression, and I'm concerned about you. These persistent feelings of sadness and emptiness are real and valid. Have you been able to talk to anyone about how you've been feeling?",
+                        "Depression can make everything feel heavy and meaningless. What you're going through is a real medical condition, not a personal failing. Please consider reaching out for professional support - you don't have to carry this alone.",
+                    ],
+                    "low": [
+                        "I notice you might be experiencing some symptoms of depression. Even when it feels mild, it's important to take these feelings seriously and take care of yourself.",
+                        "These feelings you're describing could be signs of depression. It's important to pay attention to persistent low moods and consider getting support.",
+                    ],
+                    "very_low": [
+                        "I detect some concerning patterns in what you're sharing. Even subtle signs of depression are worth addressing.",
+                        "There seems to be an underlying sadness that might benefit from some extra attention and care.",
+                    ]
+                }
+            },
+            "anxiety": {
+                "examples": [
+                    "I can't stop worrying about everything.",
+                    "My heart is racing and I feel like something bad will happen.",
+                    "I'm so nervous about the presentation tomorrow.",
+                    "What if I fail? What if everything goes wrong?"
+                ],
+                "responses": {
+                    "high": [
+                        "I can feel the intense anxiety you're experiencing right now. Your mind seems to be racing with worries, and that can feel overwhelming. Try to focus on your breathing - in for 4, hold for 4, out for 6. You're safe in this moment, even though your anxiety is telling you otherwise.",
+                        "This level of anxiety must be exhausting for you. When our minds are spinning with 'what-ifs,' it can feel impossible to find peace. Remember that most of our worries never actually happen. Can you try the 5-4-3-2-1 grounding technique with me?",
+                    ],
+                    "medium": [
+                        "I can hear the worry in your words. Anxiety has a way of making everything feel urgent and threatening, even when we're actually safe. What you're feeling is real and valid, and there are ways to help calm your nervous system.",
+                        "It sounds like your mind is caught in an anxiety spiral. This is uncomfortable but temporary. Try to bring your attention back to the present moment - what can you see, hear, and feel right now?",
+                    ],
+                    "low": [
+                        "I sense some underlying anxiety in what you're sharing. A little nervousness is normal, but if it's persistent, it's worth addressing with some calming techniques.",
+                        "There seems to be some worry beneath the surface. Gentle breathing exercises might help ease that anxious feeling.",
+                    ],
+                    "very_low": [
+                        "I detect a hint of nervousness in your message. Even small amounts of anxiety are worth acknowledging.",
+                        "There's a subtle tension in what you're saying that suggests some underlying worry.",
+                    ]
+                }
+            },
             "joy": {
                 "examples": [
                     "I just got selected for an internship!",

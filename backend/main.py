@@ -36,14 +36,32 @@ app = FastAPI(
     version="2.0.0"
 )
 
-# CORS middleware
+# CORS middleware - simplified for debugging
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:3001", "http://127.0.0.1:3001"],
+    allow_origins=["*"],  # Allow all origins for debugging
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["*"],  # Allow all methods
+    allow_headers=["*"],  # Allow all headers
 )
+
+# Manual OPTIONS handler for better CORS support
+@app.options("/{path:path}")
+async def options_handler(path: str):
+    return {"message": "OK"}
+
+# Explicit OPTIONS handlers for auth endpoints
+@app.options("/auth/register")
+async def options_register():
+    return {"message": "OK"}
+
+@app.options("/auth/login")
+async def options_login():
+    return {"message": "OK"}
+
+@app.options("/auth/me")
+async def options_me():
+    return {"message": "OK"}
 
 # Create uploads directory
 os.makedirs("uploads", exist_ok=True)

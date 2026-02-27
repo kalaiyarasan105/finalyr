@@ -185,10 +185,10 @@ const Settings = () => {
   };
 
   const tabs = [
-    { id: 'profile', label: 'Profile', icon: '👤' },
-    { id: 'preferences', label: 'Preferences', icon: '⚙️' },
-    { id: 'privacy', label: 'Privacy', icon: '🔒' },
-    { id: 'about', label: 'About', icon: 'ℹ️' }
+    { id: 'profile', label: 'Profile' },
+    { id: 'preferences', label: 'Preferences' },
+    { id: 'privacy', label: 'Privacy' },
+    { id: 'about', label: 'About' }
   ];
 
   return (
@@ -207,7 +207,9 @@ const Settings = () => {
                 className={`nav-tab ${activeTab === tab.id ? 'active' : ''}`}
                 onClick={() => setActiveTab(tab.id)}
               >
-                <span className="tab-icon">{tab.icon}</span>
+                <div className={`w-2 h-2 rounded-full mr-3 ${
+                  activeTab === tab.id ? 'bg-primary-600' : 'bg-gray-400'
+                }`}></div>
                 <span className="tab-label">{tab.label}</span>
               </button>
             ))}
@@ -282,7 +284,7 @@ const Settings = () => {
                 </div>
 
                 <button type="submit" className="btn-primary" disabled={loading}>
-                  {loading ? '⏳ Updating...' : '💾 Update Profile'}
+                  {loading ? 'Updating...' : 'Update Profile'}
                 </button>
               </form>
             </div>
@@ -377,7 +379,7 @@ const Settings = () => {
               </div>
 
               <button onClick={savePreferences} className="btn-primary">
-                💾 Save Preferences
+                Save Preferences
               </button>
             </div>
           )}
@@ -395,7 +397,7 @@ const Settings = () => {
                     <p>Download a copy of all your data including conversations, analytics, and preferences</p>
                   </div>
                   <button onClick={handleExportData} className="btn-secondary" disabled={loading}>
-                    {loading ? '⏳ Exporting...' : '📥 Export Data'}
+                    {loading ? 'Exporting...' : 'Export Data'}
                   </button>
                 </div>
 
@@ -426,7 +428,7 @@ const Settings = () => {
                     <p>Permanently delete your account and all associated data. This action cannot be undone.</p>
                   </div>
                   <button onClick={handleDeleteAccount} className="btn-danger" disabled={loading}>
-                    {loading ? '⏳ Deleting...' : '🗑️ Delete Account'}
+                    {loading ? 'Deleting...' : 'Delete Account'}
                   </button>
                 </div>
               </div>
@@ -439,7 +441,9 @@ const Settings = () => {
               
               <div className="about-content">
                 <div className="app-info">
-                  <div className="app-logo">🧠</div>
+                  <div className="w-16 h-16 bg-primary-600 text-white rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">
+                    EA
+                  </div>
                   <h3>EmotiAI</h3>
                   <p className="version">Version 2.0.0</p>
                   <p className="description">
@@ -452,14 +456,14 @@ const Settings = () => {
                 <div className="features-list">
                   <h4>Features</h4>
                   <ul>
-                    <li>🤖 AI-powered emotion detection</li>
-                    <li>📊 Comprehensive analytics dashboard</li>
-                    <li>💬 Context-aware conversations</li>
-                    <li>📷 Real-time facial emotion analysis</li>
-                    <li>🧠 Advanced emotion fusion algorithms</li>
-                    <li>📈 Emotional intelligence insights</li>
-                    <li>🌙 Dark/Light theme support</li>
-                    <li>🔒 Privacy-focused design</li>
+                    <li>AI-powered emotion detection</li>
+                    <li>Comprehensive analytics dashboard</li>
+                    <li>Context-aware conversations</li>
+                    <li>Real-time facial emotion analysis</li>
+                    <li>Advanced emotion fusion algorithms</li>
+                    <li>Emotional intelligence insights</li>
+                    <li>Dark/Light theme support</li>
+                    <li>Privacy-focused design</li>
                   </ul>
                 </div>
 
