@@ -155,6 +155,15 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  position: relative;
+}
+
+.card-actions {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  display: flex;
+  gap: 0.5rem;
 }
 
 .conv-title {
@@ -195,12 +204,12 @@
 }
 
 .delete-btn {
-  background: var(--bg-tertiary);
-  color: var(--text-secondary);
+  background: var(--danger-color);
+  color: white;
 }
 
 .delete-btn:hover {
-  background: var(--danger-color);
+  background: var(--danger-color-dark, #c53030);
   color: white;
 }
 

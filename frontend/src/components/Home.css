@@ -1,0 +1,39 @@
+.home-container {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.btn-primary {
+  background: linear-gradient(90deg,#6366f1,#06b6d4);
+  color: white;
+  border: none;
+}
+
+.btn-primary:hover { opacity: 0.95; }
+
+.btn-secondary {
+  background: transparent;
+  border: 1px solid rgba(100,116,139,0.12);
+  color: inherit;
+}
+
+.home-feature-card {
+  min-height: 140px;
+}
+
+.home-hero-visual { min-height: 80px; display:flex; align-items:center; justify-content:flex-start; }
+
+.robot-icon {
+  width: 48px;
+  height: auto;
+  display: inline-block;
+  transition: filter 200ms ease, transform 200ms ease;
+}
+.robot-icon:hover {
+  transform: translateY(-2px);
+  filter: drop-shadow(0 6px 14px rgba(99,102,241,0.18));
+}
+
+@media (max-width: 640px) {
+  .home-hero { grid-template-columns: 1fr; }
+}

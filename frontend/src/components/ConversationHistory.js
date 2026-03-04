@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { conversationAPI } from '../api/conversations';
 import { useAuth } from '../contexts/AuthContext';
 import toast from 'react-hot-toast';
+import { Trash2, Eye } from 'lucide-react';
 import './ConversationHistory.css';
 
 const ConversationHistory = ({ onSelectConversation }) => {
@@ -288,14 +289,14 @@ const ConversationHistory = ({ onSelectConversation }) => {
                     onClick={() => onSelectConversation(conv)}
                     title="View Conversation"
                   >
-                    👁️
+                    <Eye size={16} />
                   </button>
                   <button
                     className="delete-btn"
                     onClick={() => deleteConversation(conv.id)}
                     title="Delete Conversation"
                   >
-                    🗑️
+                    <Trash2 size={16} />
                   </button>
                 </div>
               </div>

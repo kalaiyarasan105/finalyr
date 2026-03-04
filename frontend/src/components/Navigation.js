@@ -9,6 +9,12 @@ const Navigation = ({ currentView, onViewChange, onCollapseChange, className = '
 
   const navigationItems = [
     {
+      id: 'home',
+      label: 'Home',
+      description: 'Welcome',
+      icon: '🏠'
+    },
+    {
       id: 'dashboard',
       label: 'Dashboard',
       description: 'Overview & Analytics',

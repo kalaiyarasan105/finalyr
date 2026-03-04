@@ -10,74 +10,16 @@ import ConversationHistory from './components/ConversationHistory';
 import EmotionalInsights from './components/EmotionalInsights';
 import Settings from './components/Settings';
 import Navigation from './components/Navigation';
+import Home from './components/Home';
 import SimpleProtectedRoute from './components/SimpleProtectedRoute';
 
 // Import modernization utilities
-import { htmxEmotionUpdater, useEmotionUpdates } from './utils/htmx';
+import { htmxEmotionUpdater } from './utils/htmx';
 
-// Emotion Indicator Component
-const EmotionIndicator = () => {
-  const currentEmotion = useEmotionUpdates();
-  const [isVisible, setIsVisible] = useState(false);
-  const [isAnimating, setIsAnimating] = useState(false);
-
-  useEffect(() => {
-    if (currentEmotion) {
-      setIsVisible(true);
-      setIsAnimating(true);
-      const timer = setTimeout(() => setIsAnimating(false), 1000);
-      return () => clearTimeout(timer);
-    }
-  }, [currentEmotion]);
-
-  const getEmotionIcon = (emotion) => {
-    const icons = {
-      joy: '😊',
-      sadness: '😢',
-      anger: '😠',
-      fear: '😨',
-      surprise: '😲',
-      disgust: '🤢',
-      neutral: '😐'
-    };
-    return icons[emotion] || '🤔';
-  };
-
-  const getEmotionColor = (emotion) => {
-    const colors = {
-      joy: '#10b981',
-      sadness: '#3b82f6',
-      anger: '#ef4444',
-      fear: '#8b5cf6',
-      surprise: '#f59e0b',
-      disgust: '#84cc16',
-      neutral: '#6b7280'
-    };
-    return colors[emotion] || '#6b7280';
-  };
-
-  if (!isVisible || !currentEmotion) return null;
-
-  return (
-    <div 
-      className={`fixed top-4 right-4 z-50 p-2 bg-white dark:bg-gray-800 rounded-full shadow-lg border border-gray-200 dark:border-gray-700 transition-all duration-300 ${
-        isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-90'
-      }`}
-    >
-      <div 
-        className={`text-2xl ${isAnimating ? 'animate-bounce-soft' : ''}`}
-        style={{ color: getEmotionColor(currentEmotion.current_emotion) }}
-        title={`${currentEmotion.current_emotion} (${Math.round(currentEmotion.confidence * 100)}%)`}
-      >
-        {getEmotionIcon(currentEmotion.current_emotion)}
-      </div>
-    </div>
-  );
-};
 
 // Main App Layout Component
 const AppLayout = () => {
-  const [currentView, setCurrentView] = useState('dashboard');
+  const [currentView, setCurrentView] = useState('home');
   const [selectedConversation, setSelectedConversation] = useState(null);
   const { user } = useAuth();
 
@@ -108,6 +50,7 @@ const AppLayout = () => {
   };
 
   const renderCurrentView = () => {
+    if (currentView === 'home') return <Home onNavigateToChat={() => setCurrentView('chat')} />;
     switch (currentView) {
       case 'dashboard':
         return <Dashboard onNavigateToChat={() => setCurrentView('chat')} />;
@@ -126,8 +69,6 @@ const AppLayout = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
-      {/* Real-time emotion indicator */}
-      <EmotionIndicator />
 
       {/* HTMX emotion updates container */}
       <div id="emotion-updates" className="hidden"></div>

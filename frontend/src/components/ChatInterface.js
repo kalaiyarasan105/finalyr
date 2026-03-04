@@ -5,7 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import WellnessRecommendations from './WellnessRecommendations';
 import toast from 'react-hot-toast';
 import styled from 'styled-components';
-import { Camera, Send, MessageCircle, User, Bot, Image as ImageIcon, Heart } from 'lucide-react';
+import { Camera, Send, MessageCircle, User, Bot, Image as ImageIcon, Heart, Mic, Volume2 } from 'lucide-react';
 
 const Container = styled.div`
   display: flex;
@@ -217,6 +217,33 @@ const ActionButton = styled.button`
   }
 `;
 
+const MicButton = styled(ActionButton)`
+  background: ${props => props.listening ? '#ef4444' : '#667eea'};
+  ${props => props.listening && 'animation: pulse 1s infinite;'}
+  &:hover {
+    background: ${props => props.listening ? '#dc2626' : '#5a6fd8'};
+  }
+  @keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+  }
+`;
+
+const SpeakButton = styled.button`
+  width: 30px;
+  height: 30px;
+  border: none;
+  background: transparent;
+  color: #667eea;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 8px;
+  &:hover { color: #5a6fd8; }
+`;
+
 const WebcamPanel = styled.div`
   background: white;
   border-radius: 15px;
@@ -257,10 +284,34 @@ const ChatInterface = () => {
   const [currentEmotion, setCurrentEmotion] = useState(null);
   const [currentEmotionIntensity, setCurrentEmotionIntensity] = useState(null);
   const [wellnessRecommendations, setWellnessRecommendations] = useState([]);
+  const [isListening, setIsListening] = useState(false);
+  const recognitionRef = useRef(null);
   const { user, logout } = useAuth();
 
   useEffect(() => {
     loadConversations();
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      const recognizer = new SpeechRecognition();
+      recognizer.continuous = false;
+      recognizer.interimResults = false;
+      recognizer.lang = 'en-US';
+      recognizer.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        setUserText(transcript);
+      };
+      recognizer.onend = () => {
+        setIsListening(false);
+      };
+      recognitionRef.current = recognizer;
+    }
+
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.abort();
+      }
+    };
   }, []);
 
   const loadConversations = async () => {
@@ -380,6 +431,31 @@ const ChatInterface = () => {
     }
   };
 
+  const startListening = () => {
+    if (!recognitionRef.current) {
+      toast.error('Speech recognition not supported in this browser');
+      return;
+    }
+    try {
+      setIsListening(true);
+      recognitionRef.current.start();
+    } catch (err) {
+      console.error('Recognition error', err);
+      setIsListening(false);
+    }
+  };
+
+  const speakText = (text) => {
+    if (!window.speechSynthesis) {
+      toast.error('Speech synthesis not supported');
+      return;
+    }
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = 1;
+    utterance.pitch = 1;
+    window.speechSynthesis.speak(utterance);
+  };
+
   return (
     <Container>
       <Sidebar>
@@ -431,7 +507,14 @@ const ChatInterface = () => {
                     {message.is_user_message ? <User size={20} /> : <Bot size={20} />}
                   </MessageIcon>
                   <MessageBubble isUser={message.is_user_message}>
-                    {message.content}
+                    <div className="flex items-center">
+                      <span>{message.content}</span>
+                      {!message.is_user_message && (
+                        <SpeakButton onClick={() => speakText(message.content)} title="Play response">
+                          <Volume2 size={16} />
+                        </SpeakButton>
+                      )}
+                    </div>
                     {message.is_user_message && (message.final_emotion || message.text_emotion || message.face_emotion) && (
                       <EmotionInfo>
                         {message.final_emotion && (
@@ -459,6 +542,14 @@ const ChatInterface = () => {
                   placeholder="Type your message..."
                   disabled={loading}
                 />
+                <MicButton
+                  onClick={startListening}
+                  disabled={loading}
+                  listening={isListening}
+                  title={isListening ? 'Listening...' : 'Speak'}
+                >
+                  <Mic size={20} />
+                </MicButton>
                 <ActionButton onClick={sendMessage} disabled={loading}>
                   <Send size={20} />
                 </ActionButton>
