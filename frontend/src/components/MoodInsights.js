@@ -102,16 +102,133 @@ const MoodInsights = () => {
     return (
       <div className="space-y-6">
         <div className="card">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-            📊 Mood Insights
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">
+            📊 Mood Insights & Tracking
           </h3>
-          <div className="text-center py-8">
-            <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full mx-auto mb-4 flex items-center justify-center">
-              <span className="text-2xl">📈</span>
+          
+          {/* Sample Chart Preview */}
+          <div className="mb-6 p-6 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+            <div className="text-center mb-4">
+              <h4 className="font-semibold text-gray-900 dark:text-white mb-2">Sample Mood Tracking Chart</h4>
+              <p className="text-sm text-gray-600 dark:text-gray-400">This is what your mood insights will look like</p>
             </div>
-            <p className="text-gray-600 dark:text-gray-400">
-              Start conversations to see your mood insights and patterns
+            
+            {/* Simple Sample Chart */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
+                <span className="text-xl">😊</span>
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300 w-20">Joy</span>
+                <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-3">
+                  <div className="h-3 bg-green-500 rounded-full" style={{width: '65%'}}></div>
+                </div>
+                <span className="text-sm text-gray-600 dark:text-gray-400">65%</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-xl">😐</span>
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300 w-20">Neutral</span>
+                <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-3">
+                  <div className="h-3 bg-blue-500 rounded-full" style={{width: '20%'}}></div>
+                </div>
+                <span className="text-sm text-gray-600 dark:text-gray-400">20%</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-xl">😢</span>
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300 w-20">Sadness</span>
+                <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-3">
+                  <div className="h-3 bg-yellow-500 rounded-full" style={{width: '15%'}}></div>
+                </div>
+                <span className="text-sm text-gray-600 dark:text-gray-400">15%</span>
+              </div>
+            </div>
+          </div>
+
+          {/* How It Works */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+              <div className="flex items-center gap-3 mb-3">
+                <span className="text-2xl">🎯</span>
+                <h4 className="font-semibold text-gray-900 dark:text-white">How Mood Tracking Works</h4>
+              </div>
+              <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                <li className="flex items-start gap-2">
+                  <span className="mt-1">1️⃣</span>
+                  <span>Share your thoughts and feelings in conversations</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="mt-1">2️⃣</span>
+                  <span>AI analyzes your emotions in real-time</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="mt-1">3️⃣</span>
+                  <span>Patterns and insights are automatically generated</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="mt-1">4️⃣</span>
+                  <span>Track your emotional journey over time</span>
+                </li>
+              </ul>
+            </div>
+
+            <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+              <div className="flex items-center gap-3 mb-3">
+                <span className="text-2xl">✨</span>
+                <h4 className="font-semibold text-gray-900 dark:text-white">Benefits of Tracking</h4>
+              </div>
+              <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                <li className="flex items-start gap-2">
+                  <span className="mt-1">📈</span>
+                  <span>Identify emotional patterns and triggers</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="mt-1">🧠</span>
+                  <span>Gain self-awareness and emotional intelligence</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="mt-1">💡</span>
+                  <span>Receive personalized wellness recommendations</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="mt-1">🎯</span>
+                  <span>Track progress towards emotional well-being</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          {/* What You'll See */}
+          <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800 mb-6">
+            <h4 className="font-semibold text-purple-900 dark:text-purple-300 mb-3">📊 What You'll See Here:</h4>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+              <div className="text-center p-2 bg-white dark:bg-gray-800 rounded">
+                <div className="text-lg mb-1">📈</div>
+                <div className="text-gray-900 dark:text-white font-medium">Emotion Trends</div>
+              </div>
+              <div className="text-center p-2 bg-white dark:bg-gray-800 rounded">
+                <div className="text-lg mb-1">🎯</div>
+                <div className="text-gray-900 dark:text-white font-medium">Trigger Analysis</div>
+              </div>
+              <div className="text-center p-2 bg-white dark:bg-gray-800 rounded">
+                <div className="text-lg mb-1">💪</div>
+                <div className="text-gray-900 dark:text-white font-medium">Coping Strategies</div>
+              </div>
+              <div className="text-center p-2 bg-white dark:bg-gray-800 rounded">
+                <div className="text-lg mb-1">🌱</div>
+                <div className="text-gray-900 dark:text-white font-medium">Wellness Progress</div>
+              </div>
+            </div>
+          </div>
+
+          {/* CTA */}
+          <div className="text-center">
+            <p className="text-gray-600 dark:text-gray-400 mb-4">
+              Start tracking your emotional journey today
             </p>
+            <button
+              onClick={() => window.location.hash = '#chat'}
+              className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium rounded-lg transition-all duration-200 shadow-md hover:shadow-lg"
+            >
+              💬 Start Your First Conversation
+            </button>
           </div>
         </div>
       </div>

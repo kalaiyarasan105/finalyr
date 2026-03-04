@@ -5,12 +5,6 @@ const WellnessRecommendations = ({ currentEmotion, emotionIntensity }) => {
   const [loading, setLoading] = useState(false);
   const [expandedRec, setExpandedRec] = useState(null);
 
-  useEffect(() => {
-    if (currentEmotion && currentEmotion !== 'neutral') {
-      fetchRecommendations();
-    }
-  }, [currentEmotion, emotionIntensity, fetchRecommendations]);
-
   const fetchRecommendations = useCallback(async () => {
     if (!currentEmotion) return;
     
@@ -34,6 +28,12 @@ const WellnessRecommendations = ({ currentEmotion, emotionIntensity }) => {
       setLoading(false);
     }
   }, [currentEmotion]);
+
+  useEffect(() => {
+    if (currentEmotion && currentEmotion !== 'neutral') {
+      fetchRecommendations();
+    }
+  }, [currentEmotion, emotionIntensity, fetchRecommendations]);
 
   const submitFeedback = async (recommendationId, feedback) => {
     try {
@@ -101,13 +101,86 @@ const WellnessRecommendations = ({ currentEmotion, emotionIntensity }) => {
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
           💡 Wellness Recommendations
         </h3>
-        <div className="text-center py-8">
-          <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full mx-auto mb-4 flex items-center justify-center">
-            <span className="text-2xl">😌</span>
+        <div className="space-y-4">
+          {/* General Wellness Tips */}
+          <div className="border border-blue-200 dark:border-blue-800 rounded-lg p-4 bg-blue-50 dark:bg-blue-900/20">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-2xl">🌟</span>
+              <h4 className="font-semibold text-blue-900 dark:text-blue-300">General Wellness Tips</h4>
+            </div>
+            <ul className="space-y-2 text-sm text-blue-800 dark:text-blue-200">
+              <li className="flex items-start gap-2">
+                <span className="mt-1">💧</span>
+                <span>Stay hydrated - drink at least 8 glasses of water daily</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="mt-1">🚶</span>
+                <span>Take short walks - even 10 minutes can boost your mood</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="mt-1">😴</span>
+                <span>Maintain a regular sleep schedule for better emotional balance</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="mt-1">🧘</span>
+                <span>Practice mindfulness - be present in the moment</span>
+              </li>
+            </ul>
           </div>
-          <p className="text-gray-600 dark:text-gray-400">
-            Share your feelings to get personalized wellness recommendations
-          </p>
+
+          {/* Breathing Exercise */}
+          <div className="border border-green-200 dark:border-green-800 rounded-lg p-4 bg-green-50 dark:bg-green-900/20">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-2xl">🌬️</span>
+              <h4 className="font-semibold text-green-900 dark:text-green-300">Quick Breathing Exercise</h4>
+            </div>
+            <div className="text-sm text-green-800 dark:text-green-200 space-y-2">
+              <p className="font-medium">4-7-8 Breathing Technique:</p>
+              <ol className="list-decimal list-inside space-y-1 ml-2">
+                <li>Breathe in through your nose for 4 counts</li>
+                <li>Hold your breath for 7 counts</li>
+                <li>Exhale slowly through your mouth for 8 counts</li>
+                <li>Repeat 3-4 times</li>
+              </ol>
+              <p className="text-xs italic mt-2">This helps calm your nervous system and reduce stress</p>
+            </div>
+          </div>
+
+          {/* Grounding Technique */}
+          <div className="border border-purple-200 dark:border-purple-800 rounded-lg p-4 bg-purple-50 dark:bg-purple-900/20">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-2xl">🧭</span>
+              <h4 className="font-semibold text-purple-900 dark:text-purple-300">5-4-3-2-1 Grounding Technique</h4>
+            </div>
+            <div className="text-sm text-purple-800 dark:text-purple-200 space-y-1">
+              <p>When feeling overwhelmed, notice:</p>
+              <ul className="space-y-1 ml-2 mt-2">
+                <li>👁️ <strong>5 things</strong> you can see</li>
+                <li>✋ <strong>4 things</strong> you can touch</li>
+                <li>👂 <strong>3 things</strong> you can hear</li>
+                <li>👃 <strong>2 things</strong> you can smell</li>
+                <li>👅 <strong>1 thing</strong> you can taste</li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Motivational Message */}
+          <div className="border border-yellow-200 dark:border-yellow-800 rounded-lg p-4 bg-yellow-50 dark:bg-yellow-900/20 text-center">
+            <p className="text-lg font-medium text-yellow-900 dark:text-yellow-300 mb-2">
+              "Every small step towards wellness counts"
+            </p>
+            <p className="text-sm text-yellow-800 dark:text-yellow-200">
+              Start a conversation to get personalized recommendations based on your emotions
+            </p>
+          </div>
+
+          {/* CTA Button */}
+          <button
+            onClick={() => window.location.hash = '#chat'}
+            className="w-full py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium rounded-lg transition-all duration-200 shadow-md hover:shadow-lg"
+          >
+            💬 Start New Chat
+          </button>
         </div>
       </div>
     );
@@ -223,13 +296,45 @@ const WellnessRecommendations = ({ currentEmotion, emotionIntensity }) => {
           )}
         </div>
       ) : (
-        <div className="text-center py-8">
-          <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full mx-auto mb-4 flex items-center justify-center">
-            <span className="text-2xl">🤔</span>
+        <div className="space-y-4">
+          <div className="text-center py-4">
+            <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full mx-auto mb-4 flex items-center justify-center">
+              <span className="text-2xl">🤔</span>
+            </div>
+            <p className="text-gray-600 dark:text-gray-400 mb-4">
+              No specific recommendations available right now
+            </p>
           </div>
-          <p className="text-gray-600 dark:text-gray-400">
-            No recommendations available for this emotion right now
-          </p>
+
+          {/* Fallback General Tips */}
+          <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+            <h4 className="font-semibold text-gray-900 dark:text-white mb-3">💡 General Wellness Tips</h4>
+            <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+              <div className="flex items-start gap-2">
+                <span>🌅</span>
+                <span>Start your day with a positive affirmation</span>
+              </div>
+              <div className="flex items-start gap-2">
+                <span>🍎</span>
+                <span>Eat nutritious meals at regular intervals</span>
+              </div>
+              <div className="flex items-start gap-2">
+                <span>📱</span>
+                <span>Take breaks from screens every hour</span>
+              </div>
+              <div className="flex items-start gap-2">
+                <span>🤝</span>
+                <span>Connect with friends or family today</span>
+              </div>
+            </div>
+          </div>
+
+          <button
+            onClick={() => window.location.hash = '#chat'}
+            className="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
+          >
+            Start a Conversation for Personalized Tips
+          </button>
         </div>
       )}
     </div>

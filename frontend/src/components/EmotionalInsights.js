@@ -196,7 +196,8 @@ const EmotionalInsights = ({ onNavigateToChat }) => {
               <div key={emotion} className="emotion-bar">
                 <div className="emotion-info">
                   <span className="emotion-label">
-                    {getEmotionIcon(emotion)} {emotion}
+                    <span className="emotion-icon-display">{getEmotionIcon(emotion)}</span>
+                    <span className="emotion-name-display">{emotion.charAt(0).toUpperCase() + emotion.slice(1)}</span>
                   </span>
                   <span className="emotion-stats">
                     {data.count} ({data.percentage}%)

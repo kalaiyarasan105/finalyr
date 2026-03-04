@@ -187,10 +187,24 @@
 }
 
 .emotion-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   font-size: 0.875rem;
   font-weight: 600;
   color: var(--text-primary);
   text-transform: capitalize;
+}
+
+.emotion-icon-display {
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.emotion-name-display {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
 }
 
 .emotion-stats {

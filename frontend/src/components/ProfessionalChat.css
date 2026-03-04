@@ -66,6 +66,18 @@
   transition: all 0.3s ease;
 }
 
+/* Hide sidebar completely */
+.professional-chat.no-sidebar .sidebar {
+  display: none !important;
+}
+
+/* Make main content full width when sidebar is hidden */
+.professional-chat.no-sidebar .main-content,
+.main-content.full-width {
+  width: 100% !important;
+  flex: 1 !important;
+}
+
 /* Sidebar Styles */
 .sidebar {
   width: 320px;
@@ -611,6 +623,38 @@
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-lg);
   overflow: hidden;
+  position: relative;
+}
+
+/* Scroll Progress Indicator */
+.scroll-progress-container {
+  position: absolute;
+  right: 8px;
+  top: 16px;
+  bottom: 80px;
+  width: 3px;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 2px;
+  z-index: 10;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.dark-theme .scroll-progress-container {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.scroll-progress-bar {
+  width: 100%;
+  background: linear-gradient(180deg, #6366f1 0%, #8b5cf6 100%);
+  border-radius: 2px;
+  transition: height 0.15s ease-out;
+  box-shadow: 0 0 8px rgba(99, 102, 241, 0.3);
+}
+
+.dark-theme .scroll-progress-bar {
+  background: linear-gradient(180deg, #818cf8 0%, #a78bfa 100%);
+  box-shadow: 0 0 8px rgba(129, 140, 248, 0.4);
 }
 
 .messages-container {
@@ -1322,5 +1366,295 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+
+/* ==================== CELEBRATION MODE ==================== */
+
+/* Celebration Mode Background */
+.professional-chat.celebration-mode {
+  position: relative;
+  overflow: hidden;
+}
+
+.professional-chat.celebration-mode::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, 
+    rgba(255, 223, 0, 0.08) 0%, 
+    rgba(255, 165, 0, 0.08) 35%, 
+    rgba(255, 192, 203, 0.08) 70%,
+    rgba(255, 223, 0, 0.08) 100%
+  );
+  background-size: 400% 400%;
+  animation: celebrationGradient 8s ease infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+
+@keyframes celebrationGradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Celebration Overlay */
+.celebration-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 999;
+  animation: celebrationFadeIn 0.4s ease;
+}
+
+@keyframes celebrationFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Celebration Sparkles */
+.celebration-sparkles {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+}
+
+.sparkle {
+  position: absolute;
+  font-size: 1.5rem;
+  opacity: 0;
+  animation: sparkleFloat 3s ease-in-out infinite;
+  filter: drop-shadow(0 0 4px rgba(255, 215, 0, 0.6));
+}
+
+/* Individual sparkle positions and delays */
+.sparkle-1 { left: 10%; animation-delay: 0s; }
+.sparkle-2 { left: 20%; animation-delay: 0.3s; }
+.sparkle-3 { left: 30%; animation-delay: 0.6s; }
+.sparkle-4 { left: 40%; animation-delay: 0.9s; }
+.sparkle-5 { left: 50%; animation-delay: 1.2s; }
+.sparkle-6 { left: 60%; animation-delay: 1.5s; }
+.sparkle-7 { left: 70%; animation-delay: 1.8s; }
+.sparkle-8 { left: 80%; animation-delay: 2.1s; }
+.sparkle-9 { left: 90%; animation-delay: 2.4s; }
+.sparkle-10 { left: 15%; animation-delay: 0.4s; }
+.sparkle-11 { left: 45%; animation-delay: 1.0s; }
+.sparkle-12 { left: 75%; animation-delay: 1.6s; }
+
+@keyframes sparkleFloat {
+  0% {
+    top: -10%;
+    opacity: 0;
+    transform: translateY(0) rotate(0deg) scale(0.5);
+  }
+  10% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+    transform: translateY(50vh) rotate(180deg) scale(1);
+  }
+  90% {
+    opacity: 0.3;
+  }
+  100% {
+    top: 110%;
+    opacity: 0;
+    transform: translateY(100vh) rotate(360deg) scale(0.5);
+  }
+}
+
+/* Celebration Message */
+.celebration-message {
+  position: absolute;
+  top: 20%;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  animation: celebrationMessageSlide 0.5s ease-out;
+  pointer-events: none;
+}
+
+@keyframes celebrationMessageSlide {
+  from {
+    top: 10%;
+    opacity: 0;
+    transform: translateX(-50%) scale(0.8);
+  }
+  to {
+    top: 20%;
+    opacity: 1;
+    transform: translateX(-50%) scale(1);
+  }
+}
+
+.celebration-emoji {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  animation: celebrationPulse 2s ease-in-out infinite;
+  filter: drop-shadow(0 4px 12px rgba(255, 215, 0, 0.4));
+}
+
+@keyframes celebrationPulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.15);
+  }
+}
+
+.celebration-text {
+  font-size: 1.75rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #FFD700, #FFA500, #FF69B4);
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: celebrationTextGradient 3s ease infinite;
+  text-shadow: 0 2px 8px rgba(255, 215, 0, 0.3);
+  padding: 0.5rem 1.5rem;
+  border-radius: 2rem;
+  backdrop-filter: blur(10px);
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+@keyframes celebrationTextGradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Glow effect on emotion badge during celebration */
+.professional-chat.celebration-mode .emotion-badge,
+.professional-chat.celebration-mode .message-emotion {
+  animation: celebrationGlow 2s ease-in-out infinite;
+}
+
+@keyframes celebrationGlow {
+  0%, 100% {
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.3),
+                0 0 20px rgba(255, 215, 0, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.5),
+                0 0 40px rgba(255, 215, 0, 0.3),
+                0 0 60px rgba(255, 215, 0, 0.2);
+  }
+}
+
+/* Header pulse during celebration */
+.professional-chat.celebration-mode .chat-header h2 {
+  animation: celebrationHeaderPulse 3s ease-in-out infinite;
+}
+
+@keyframes celebrationHeaderPulse {
+  0%, 100% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+  50% {
+    transform: scale(1.02);
+    filter: brightness(1.1);
+  }
+}
+
+/* Ensure content stays interactive */
+.professional-chat.celebration-mode .main-content,
+.professional-chat.celebration-mode .chat-input-area,
+.professional-chat.celebration-mode .messages-container {
+  position: relative;
+  z-index: 2;
+}
+
+/* Dark mode adjustments for celebration */
+.dark-theme .celebration-text {
+  background: linear-gradient(135deg, #FFD700, #FFA500, #FF69B4);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 2px 12px rgba(255, 215, 0, 0.5);
+}
+
+.dark-theme .professional-chat.celebration-mode::before {
+  background: linear-gradient(135deg, 
+    rgba(255, 223, 0, 0.12) 0%, 
+    rgba(255, 165, 0, 0.12) 35%, 
+    rgba(255, 192, 203, 0.12) 70%,
+    rgba(255, 223, 0, 0.12) 100%
+  );
+  background-size: 400% 400%;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .celebration-emoji {
+    font-size: 3rem;
+  }
+  
+  .celebration-text {
+    font-size: 1.25rem;
+    padding: 0.4rem 1rem;
+  }
+  
+  .sparkle {
+    font-size: 1.2rem;
+  }
+  
+  .celebration-message {
+    top: 15%;
+  }
+}
+
+/* Smooth transition when celebration ends */
+.professional-chat {
+  transition: all 0.3s ease;
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .celebration-overlay,
+  .sparkle,
+  .celebration-emoji,
+  .celebration-text,
+  .professional-chat.celebration-mode::before {
+    animation: none !important;
+  }
+  
+  .celebration-message {
+    animation: none !important;
+    opacity: 1;
+  }
+  
+  .sparkle {
+    display: none;
   }
 }

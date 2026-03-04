@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../api/auth';
 import toast from 'react-hot-toast';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 import './Settings.css';
 
 const Settings = () => {
@@ -9,6 +11,7 @@ const Settings = () => {
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('profile');
   const [darkMode, setDarkMode] = useState(false);
+  const [showExportModal, setShowExportModal] = useState(false);
   
   // Profile settings
   const [profileData, setProfileData] = useState({
@@ -123,32 +126,339 @@ const Settings = () => {
     }
   };
 
-  const handleExportData = async () => {
-    setLoading(true);
+  const fetchConversationData = async () => {
     try {
-      // Simulate data export
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Import conversation API
+      const { conversationAPI } = await import('../api/conversations');
       
-      // Create a mock export file
+      // Fetch all conversations
+      const conversations = await conversationAPI.getConversations();
+      
+      // Fetch full details for each conversation including messages
+      const conversationsWithMessages = await Promise.all(
+        conversations.map(async (conv) => {
+          try {
+            const fullConversation = await conversationAPI.getConversation(conv.id);
+            
+            // Calculate dominant emotion and average confidence from messages
+            const userMessages = fullConversation.messages.filter(msg => msg.is_user_message && msg.final_emotion);
+            
+            let dominantEmotion = null;
+            let averageConfidence = 0;
+            
+            if (userMessages.length > 0) {
+              // Count emotion occurrences
+              const emotionCounts = {};
+              let totalConfidence = 0;
+              
+              userMessages.forEach(msg => {
+                emotionCounts[msg.final_emotion] = (emotionCounts[msg.final_emotion] || 0) + 1;
+                totalConfidence += msg.final_confidence || 0;
+              });
+              
+              // Find dominant emotion
+              dominantEmotion = Object.keys(emotionCounts).reduce((a, b) => 
+                emotionCounts[a] > emotionCounts[b] ? a : b
+              );
+              
+              // Calculate average confidence
+              averageConfidence = totalConfidence / userMessages.length;
+            }
+            
+            // Format messages
+            const formattedMessages = fullConversation.messages.map(msg => ({
+              message_id: msg.id,
+              sender: msg.is_user_message ? 'user' : 'ai',
+              text: msg.content,
+              detected_emotion: msg.final_emotion || null,
+              confidence: msg.final_confidence || null,
+              timestamp: msg.created_at
+            }));
+            
+            return {
+              conversation_id: fullConversation.id,
+              title: fullConversation.title,
+              created_at: fullConversation.created_at,
+              dominant_emotion: dominantEmotion,
+              average_confidence: averageConfidence,
+              messages: formattedMessages
+            };
+          } catch (error) {
+            console.error(`Error fetching conversation ${conv.id}:`, error);
+            return null;
+          }
+        })
+      );
+      
+      // Filter out any failed conversation fetches
+      return conversationsWithMessages.filter(conv => conv !== null);
+    } catch (error) {
+      console.error('Error fetching conversation data:', error);
+      throw error;
+    }
+  };
+
+  const exportAsJSON = (exportData) => {
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `emotiAI-data-export-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const exportAsPDF = (exportData) => {
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    let yPos = 20;
+
+    // Title
+    doc.setFontSize(20);
+    doc.setFont(undefined, 'bold');
+    doc.text('EmotiAI Data Export Report', pageWidth / 2, yPos, { align: 'center' });
+    yPos += 15;
+
+    // Export Date
+    doc.setFontSize(10);
+    doc.setFont(undefined, 'normal');
+    doc.text(`Export Date: ${new Date(exportData.exportDate).toLocaleString()}`, 14, yPos);
+    yPos += 10;
+
+    // User Information Section
+    doc.setFontSize(14);
+    doc.setFont(undefined, 'bold');
+    doc.text('User Information', 14, yPos);
+    yPos += 8;
+    
+    doc.setFontSize(10);
+    doc.setFont(undefined, 'normal');
+    doc.text(`Username: ${exportData.user.username}`, 14, yPos);
+    yPos += 6;
+    doc.text(`Email: ${exportData.user.email}`, 14, yPos);
+    yPos += 6;
+    doc.text(`User ID: ${exportData.user.id}`, 14, yPos);
+    yPos += 12;
+
+    // Emotional Summary Section
+    if (exportData.conversations && exportData.conversations.length > 0) {
+      doc.setFontSize(14);
+      doc.setFont(undefined, 'bold');
+      doc.text('Emotional Summary', 14, yPos);
+      yPos += 8;
+
+      // Calculate emotion distribution
+      const emotionCounts = {};
+      let totalMessages = 0;
+      let totalConfidence = 0;
+      let confidenceCount = 0;
+
+      exportData.conversations.forEach(conv => {
+        conv.messages.forEach(msg => {
+          if (msg.sender === 'user' && msg.detected_emotion) {
+            emotionCounts[msg.detected_emotion] = (emotionCounts[msg.detected_emotion] || 0) + 1;
+            totalMessages++;
+            if (msg.confidence) {
+              totalConfidence += msg.confidence;
+              confidenceCount++;
+            }
+          }
+        });
+      });
+
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'normal');
+      doc.text(`Total Conversations: ${exportData.conversations.length}`, 14, yPos);
+      yPos += 6;
+      doc.text(`Total Messages: ${totalMessages}`, 14, yPos);
+      yPos += 6;
+      
+      if (confidenceCount > 0) {
+        const avgConfidence = (totalConfidence / confidenceCount * 100).toFixed(1);
+        doc.text(`Average AI Confidence: ${avgConfidence}%`, 14, yPos);
+        yPos += 10;
+      } else {
+        yPos += 4;
+      }
+
+      // Emotion Distribution
+      if (Object.keys(emotionCounts).length > 0) {
+        doc.setFontSize(12);
+        doc.setFont(undefined, 'bold');
+        doc.text('Emotion Distribution:', 14, yPos);
+        yPos += 6;
+
+        doc.setFontSize(10);
+        doc.setFont(undefined, 'normal');
+        Object.entries(emotionCounts)
+          .sort((a, b) => b[1] - a[1])
+          .forEach(([emotion, count]) => {
+            const percentage = ((count / totalMessages) * 100).toFixed(1);
+            doc.text(`  ${emotion.charAt(0).toUpperCase() + emotion.slice(1)}: ${count} (${percentage}%)`, 14, yPos);
+            yPos += 5;
+          });
+        yPos += 8;
+      }
+
+      // Check if we need a new page
+      if (yPos > 250) {
+        doc.addPage();
+        yPos = 20;
+      }
+
+      // Conversation List
+      doc.setFontSize(14);
+      doc.setFont(undefined, 'bold');
+      doc.text('Conversation History', 14, yPos);
+      yPos += 8;
+
+      exportData.conversations.forEach((conv, index) => {
+        // Check if we need a new page
+        if (yPos > 260) {
+          doc.addPage();
+          yPos = 20;
+        }
+
+        doc.setFontSize(11);
+        doc.setFont(undefined, 'bold');
+        doc.text(`${index + 1}. ${conv.title}`, 14, yPos);
+        yPos += 6;
+
+        doc.setFontSize(9);
+        doc.setFont(undefined, 'normal');
+        doc.text(`Created: ${new Date(conv.created_at).toLocaleString()}`, 18, yPos);
+        yPos += 5;
+        
+        if (conv.dominant_emotion) {
+          doc.text(`Dominant Emotion: ${conv.dominant_emotion} (${(conv.average_confidence * 100).toFixed(1)}% confidence)`, 18, yPos);
+          yPos += 5;
+        }
+        
+        doc.text(`Messages: ${conv.messages.length}`, 18, yPos);
+        yPos += 8;
+
+        // Add sample messages (first 3)
+        const sampleMessages = conv.messages.slice(0, 3);
+        sampleMessages.forEach(msg => {
+          if (yPos > 270) {
+            doc.addPage();
+            yPos = 20;
+          }
+
+          const senderLabel = msg.sender === 'user' ? 'You' : 'AI';
+          doc.setFont(undefined, 'bold');
+          doc.text(`${senderLabel}:`, 22, yPos);
+          doc.setFont(undefined, 'normal');
+          
+          // Wrap text
+          const textLines = doc.splitTextToSize(msg.text, pageWidth - 30);
+          doc.text(textLines, 22, yPos + 4);
+          yPos += (textLines.length * 4) + 3;
+
+          if (msg.detected_emotion) {
+            doc.setFontSize(8);
+            doc.text(`[${msg.detected_emotion}, ${(msg.confidence * 100).toFixed(0)}%]`, 22, yPos);
+            doc.setFontSize(9);
+            yPos += 4;
+          }
+        });
+
+        if (conv.messages.length > 3) {
+          doc.setFontSize(8);
+          doc.setFont(undefined, 'italic');
+          doc.text(`... and ${conv.messages.length - 3} more messages`, 22, yPos);
+          doc.setFontSize(9);
+          doc.setFont(undefined, 'normal');
+          yPos += 6;
+        }
+
+        yPos += 4;
+      });
+    }
+
+    // Save PDF
+    doc.save(`emotiAI-data-export-${new Date().toISOString().split('T')[0]}.pdf`);
+  };
+
+  const exportAsCSV = (exportData) => {
+    // CSV Headers
+    const headers = ['conversation_id', 'conversation_title', 'sender', 'message', 'emotion', 'confidence', 'timestamp'];
+    
+    // Build CSV rows
+    const rows = [headers];
+    
+    if (exportData.conversations) {
+      exportData.conversations.forEach(conv => {
+        conv.messages.forEach(msg => {
+          rows.push([
+            conv.conversation_id,
+            `"${conv.title.replace(/"/g, '""')}"`, // Escape quotes
+            msg.sender,
+            `"${msg.text.replace(/"/g, '""')}"`, // Escape quotes
+            msg.detected_emotion || '',
+            msg.confidence ? msg.confidence.toFixed(4) : '',
+            msg.timestamp
+          ]);
+        });
+      });
+    }
+    
+    // Convert to CSV string
+    const csvContent = rows.map(row => row.join(',')).join('\n');
+    
+    // Create and download file
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `emotiAI-data-export-${new Date().toISOString().split('T')[0]}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleExportData = async (format = 'json') => {
+    setLoading(true);
+    setShowExportModal(false);
+    
+    try {
+      // Fetch conversation data
+      const validConversations = await fetchConversationData();
+      
+      // Create comprehensive export data
       const exportData = {
-        user: user,
+        user: {
+          username: user.username,
+          email: user.email,
+          id: user.id
+        },
         preferences: preferences,
+        conversations: validConversations,
         exportDate: new Date().toISOString(),
-        note: 'This is a simulated data export. In a real application, this would contain all user data.'
+        note: 'Complete data export including all conversations and messages from EmotiAI.'
       };
       
-      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `emotiAI-data-export-${new Date().toISOString().split('T')[0]}.json`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      
-      toast.success('Data exported successfully');
+      // Export based on selected format
+      switch (format) {
+        case 'pdf':
+          exportAsPDF(exportData);
+          toast.success(`PDF exported successfully (${validConversations.length} conversations)`);
+          break;
+        case 'csv':
+          exportAsCSV(exportData);
+          toast.success(`CSV exported successfully (${validConversations.length} conversations)`);
+          break;
+        case 'json':
+        default:
+          exportAsJSON(exportData);
+          toast.success(`JSON exported successfully (${validConversations.length} conversations)`);
+          break;
+      }
     } catch (error) {
+      console.error('Export error:', error);
       toast.error('Failed to export data');
     } finally {
       setLoading(false);
@@ -396,7 +706,7 @@ const Settings = () => {
                     <h4>Export Your Data</h4>
                     <p>Download a copy of all your data including conversations, analytics, and preferences</p>
                   </div>
-                  <button onClick={handleExportData} className="btn-secondary" disabled={loading}>
+                  <button onClick={() => setShowExportModal(true)} className="btn-secondary" disabled={loading}>
                     {loading ? 'Exporting...' : 'Export Data'}
                   </button>
                 </div>
@@ -497,6 +807,64 @@ const Settings = () => {
           )}
         </div>
       </div>
+
+      {/* Export Format Modal */}
+      {showExportModal && (
+        <div className="export-modal-overlay" onClick={() => setShowExportModal(false)}>
+          <div className="export-modal" onClick={(e) => e.stopPropagation()}>
+            <h3>Choose Export Format</h3>
+            <p className="export-modal-description">
+              Select the format for your data export
+            </p>
+            
+            <div className="export-format-options">
+              <button
+                className="export-format-btn"
+                onClick={() => handleExportData('json')}
+                disabled={loading}
+              >
+                <div className="format-icon">📄</div>
+                <div className="format-info">
+                  <h4>JSON</h4>
+                  <p>Developer format - Complete structured data</p>
+                </div>
+              </button>
+
+              <button
+                className="export-format-btn"
+                onClick={() => handleExportData('pdf')}
+                disabled={loading}
+              >
+                <div className="format-icon">📋</div>
+                <div className="format-info">
+                  <h4>PDF</h4>
+                  <p>User-friendly report - Professional layout</p>
+                </div>
+              </button>
+
+              <button
+                className="export-format-btn"
+                onClick={() => handleExportData('csv')}
+                disabled={loading}
+              >
+                <div className="format-icon">📊</div>
+                <div className="format-info">
+                  <h4>CSV</h4>
+                  <p>Tabular format - Spreadsheet compatible</p>
+                </div>
+              </button>
+            </div>
+
+            <button
+              className="export-modal-close"
+              onClick={() => setShowExportModal(false)}
+              disabled={loading}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

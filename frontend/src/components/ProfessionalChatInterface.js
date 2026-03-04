@@ -5,14 +5,16 @@ import { useAuth } from '../contexts/AuthContext';
 import toast from 'react-hot-toast';
 import axios from 'axios';
 import './ProfessionalChat.css';
+import './CelebrationStyles.css';
 import RecommendationSelector from './RecommendationSelector';
 import RecommendationDisplay from './RecommendationDisplay';
 import ColorTherapy from './ColorTherapy';
 import useRecommendationStore from '../store/recommendationStore';
 
-const ProfessionalChatInterface = () => {
+const ProfessionalChatInterface = ({ selectedConversation }) => {
   const webcamRef = useRef(null);
   const messagesEndRef = useRef(null);
+  const messagesContainerRef = useRef(null);
   const [userText, setUserText] = useState('');
   const [conversations, setConversations] = useState([]);
   const [currentConversation, setCurrentConversation] = useState(null);
@@ -22,12 +24,17 @@ const ProfessionalChatInterface = () => {
   const [emotionStats, setEmotionStats] = useState({});
   const [darkMode, setDarkMode] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0);
   const { user, logout } = useAuth();
   
   // Recommendation system state
   const [showRecommendations, setShowRecommendations] = useState(false);
   const [recommendationView, setRecommendationView] = useState('selector'); // 'selector' or 'display'
   const [recommendationMessageId, setRecommendationMessageId] = useState(null); // Track which message shows recommendations
+  const [showCelebration, setShowCelebration] = useState(false);
+  const [celebrationEmotion, setCelebrationEmotion] = useState(null);
+  const [showFireworks, setShowFireworks] = useState(false);
+  const fireworksCanvasRef = useRef(null);
   const { 
     setCurrentEmotion, 
     setSelectedCategory, 
@@ -46,6 +53,26 @@ const ProfessionalChatInterface = () => {
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Handle selectedConversation prop from history page
+  useEffect(() => {
+    if (selectedConversation) {
+      loadSelectedConversation(selectedConversation);
+    }
+  }, [selectedConversation]);
+
+  const loadSelectedConversation = async (conversation) => {
+    try {
+      // Fetch full conversation data with messages
+      const fullConv = await conversationAPI.getConversation(conversation.id);
+      setCurrentConversation(fullConv);
+      setMessages(fullConv.messages || []);
+      toast.success(`Loaded conversation: ${fullConv.title}`);
+    } catch (error) {
+      toast.error('Failed to load selected conversation');
+      console.error('Error loading conversation:', error);
+    }
+  };
+
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
@@ -60,6 +87,272 @@ const ProfessionalChatInterface = () => {
   useEffect(() => {
     calculateEmotionStats();
   }, [messages]);
+
+  // Scroll progress indicator
+  useEffect(() => {
+    const messagesContainer = messagesContainerRef.current;
+    if (!messagesContainer) return;
+
+    const handleScroll = () => {
+      const scrollTop = messagesContainer.scrollTop;
+      const scrollHeight = messagesContainer.scrollHeight;
+      const clientHeight = messagesContainer.clientHeight;
+      
+      // Calculate scroll percentage
+      const totalScrollable = scrollHeight - clientHeight;
+      const progress = totalScrollable > 0 ? (scrollTop / totalScrollable) * 100 : 0;
+      
+      setScrollProgress(Math.min(100, Math.max(0, progress)));
+    };
+
+    messagesContainer.addEventListener('scroll', handleScroll);
+    // Initial calculation
+    handleScroll();
+
+    return () => {
+      messagesContainer.removeEventListener('scroll', handleScroll);
+    };
+  }, [messages]);
+
+  // Fireworks animation effect
+  useEffect(() => {
+    if (!showFireworks || !fireworksCanvasRef.current) return;
+
+    const canvas = fireworksCanvasRef.current;
+    const ctx = canvas.getContext('2d');
+    
+    // Set canvas to full viewport size
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const fireworks = [];
+    const particles = [];
+    let animationId;
+    let startTime = Date.now();
+    const duration = 5000; // 5 seconds
+
+    // Bright celebratory colors
+    const colors = [
+      { h: 45, name: 'gold' },      // Gold
+      { h: 330, name: 'pink' },     // Pink
+      { h: 200, name: 'blue' },     // Blue
+      { h: 280, name: 'purple' },   // Purple
+      { h: 15, name: 'orange' },    // Orange
+      { h: 160, name: 'cyan' }      // Cyan
+    ];
+
+    class Firework {
+      constructor(x, targetY, colorIndex) {
+        this.x = x;
+        this.y = canvas.height;
+        this.targetY = targetY;
+        this.speed = 4 + Math.random() * 3;
+        this.acceleration = 1.08;
+        this.exploded = false;
+        this.color = colors[colorIndex % colors.length];
+        this.hue = this.color.h;
+        this.trailLength = 20;
+        this.trail = [];
+      }
+
+      update() {
+        if (!this.exploded) {
+          // Add trail
+          this.trail.push({ x: this.x, y: this.y });
+          if (this.trail.length > this.trailLength) {
+            this.trail.shift();
+          }
+
+          this.speed *= this.acceleration;
+          this.y -= this.speed;
+
+          if (this.y <= this.targetY) {
+            this.exploded = true;
+            this.createParticles();
+          }
+        }
+      }
+
+      createParticles() {
+        // Create MORE particles for bigger explosions
+        const particleCount = 80 + Math.random() * 80; // 80-160 particles
+        for (let i = 0; i < particleCount; i++) {
+          particles.push(new Particle(this.x, this.y, this.hue));
+        }
+      }
+
+      draw() {
+        if (!this.exploded) {
+          // Draw trail
+          this.trail.forEach((point, index) => {
+            const alpha = index / this.trail.length;
+            ctx.save();
+            ctx.globalAlpha = alpha;
+            ctx.beginPath();
+            ctx.arc(point.x, point.y, 4, 0, Math.PI * 2);
+            ctx.fillStyle = `hsl(${this.hue}, 100%, 60%)`;
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = `hsl(${this.hue}, 100%, 60%)`;
+            ctx.fill();
+            ctx.restore();
+          });
+
+          // Draw main firework
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, 5, 0, Math.PI * 2);
+          ctx.fillStyle = `hsl(${this.hue}, 100%, 70%)`;
+          ctx.shadowBlur = 20;
+          ctx.shadowColor = `hsl(${this.hue}, 100%, 70%)`;
+          ctx.fill();
+          ctx.restore();
+        }
+      }
+    }
+
+    class Particle {
+      constructor(x, y, hue) {
+        this.x = x;
+        this.y = y;
+        this.hue = hue + Math.random() * 60 - 30; // More color variation
+        const angle = Math.random() * Math.PI * 2;
+        const speed = 2 + Math.random() * 10; // Faster, bigger spread
+        this.velocity = {
+          x: Math.cos(angle) * speed,
+          y: Math.sin(angle) * speed
+        };
+        this.gravity = 0.15;
+        this.friction = 0.97;
+        this.alpha = 1;
+        this.decay = 0.012 + Math.random() * 0.008;
+        this.size = 2 + Math.random() * 3; // Larger particles
+        this.trail = [];
+        this.trailLength = 8;
+      }
+
+      update() {
+        // Add trail
+        this.trail.push({ x: this.x, y: this.y, alpha: this.alpha });
+        if (this.trail.length > this.trailLength) {
+          this.trail.shift();
+        }
+
+        this.velocity.x *= this.friction;
+        this.velocity.y *= this.friction;
+        this.velocity.y += this.gravity;
+        this.x += this.velocity.x;
+        this.y += this.velocity.y;
+        this.alpha -= this.decay;
+      }
+
+      draw() {
+        // Draw trail
+        this.trail.forEach((point, index) => {
+          const trailAlpha = (index / this.trail.length) * point.alpha * 0.5;
+          ctx.save();
+          ctx.globalAlpha = trailAlpha;
+          ctx.beginPath();
+          ctx.arc(point.x, point.y, this.size * 0.5, 0, Math.PI * 2);
+          ctx.fillStyle = `hsl(${this.hue}, 100%, 60%)`;
+          ctx.fill();
+          ctx.restore();
+        });
+
+        // Draw main particle with glow
+        ctx.save();
+        ctx.globalAlpha = this.alpha;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fillStyle = `hsl(${this.hue}, 100%, 60%)`;
+        ctx.shadowBlur = 15;
+        ctx.shadowColor = `hsl(${this.hue}, 100%, 60%)`;
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    // Launch fireworks across the screen
+    const launchFirework = (index) => {
+      // Distribute fireworks across screen width
+      const sections = 8;
+      const sectionWidth = canvas.width / sections;
+      const x = (index % sections) * sectionWidth + sectionWidth / 2 + (Math.random() - 0.5) * sectionWidth * 0.5;
+      
+      // Vary explosion heights
+      const targetY = canvas.height * 0.15 + Math.random() * canvas.height * 0.35;
+      
+      fireworks.push(new Firework(x, targetY, index));
+    };
+
+    // Launch 8 fireworks with staggered timing
+    const fireworkCount = 8;
+    const launchIntervals = [];
+    
+    for (let i = 0; i < fireworkCount; i++) {
+      const timeout = setTimeout(() => {
+        launchFirework(i);
+      }, i * 400); // Launch every 400ms
+      launchIntervals.push(timeout);
+    }
+
+    // Animation loop
+    const animate = () => {
+      const elapsed = Date.now() - startTime;
+      
+      // Fade background for trail effect
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.08)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Update and draw fireworks
+      for (let i = fireworks.length - 1; i >= 0; i--) {
+        fireworks[i].update();
+        fireworks[i].draw();
+        
+        if (fireworks[i].exploded) {
+          fireworks.splice(i, 1);
+        }
+      }
+
+      // Update and draw particles
+      for (let i = particles.length - 1; i >= 0; i--) {
+        particles[i].update();
+        particles[i].draw();
+        
+        if (particles[i].alpha <= 0) {
+          particles.splice(i, 1);
+        }
+      }
+
+      // Continue animation if within duration and there are active elements
+      if (elapsed < duration && (fireworks.length > 0 || particles.length > 0)) {
+        animationId = requestAnimationFrame(animate);
+      } else if (particles.length > 0) {
+        // Let remaining particles finish
+        animationId = requestAnimationFrame(animate);
+      } else {
+        // Animation complete, fade out and hide
+        setShowFireworks(false);
+      }
+    };
+
+    animate();
+
+    // Handle window resize
+    const handleResize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+    window.addEventListener('resize', handleResize);
+
+    // Cleanup
+    return () => {
+      if (animationId) {
+        cancelAnimationFrame(animationId);
+      }
+      launchIntervals.forEach(timeout => clearTimeout(timeout));
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [showFireworks]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -239,6 +532,7 @@ const ProfessionalChatInterface = () => {
       
       // Trigger recommendations for negative emotions
       const negativeEmotions = ['sadness', 'sad', 'anger', 'angry', 'fear', 'fearful', 'disgust', 'disgusted'];
+      const positiveEmotions = ['joy', 'happy'];
       const detectedEmotion = response.final_emotion.toLowerCase().trim();
       
       console.log('=== RECOMMENDATION TRIGGER CHECK ===');
@@ -254,6 +548,24 @@ const ProfessionalChatInterface = () => {
         // Trigger recommendations immediately
         await triggerRecommendations(detectedEmotion);
         console.log('Recommendations triggered, showRecommendations should be true');
+      }
+      
+      // Trigger celebration for positive emotions
+      if (positiveEmotions.includes(detectedEmotion)) {
+        console.log('=== CELEBRATION TRIGGER ===');
+        console.log('Positive emotion detected:', detectedEmotion);
+        setCelebrationEmotion(detectedEmotion);
+        setShowCelebration(true);
+        setShowFireworks(true); // Trigger fireworks animation
+        
+        // Auto-hide celebration after 5 seconds
+        setTimeout(() => {
+          setShowCelebration(false);
+        }, 5000);
+      } else {
+        // Hide celebration if emotion changes to non-positive
+        setShowCelebration(false);
+        setShowFireworks(false);
       }
       
       // Refresh conversations to update the list
@@ -374,51 +686,73 @@ const ProfessionalChatInterface = () => {
 
   return (
     <ColorTherapy>
-      <div className={`professional-chat ${darkMode ? 'dark' : 'light'}`}>
-        {/* Sidebar */}
-        <div className={`sidebar ${sidebarCollapsed ? 'collapsed' : ''}`}>
-        <div className="sidebar-header">
-          <button 
-            className="collapse-btn"
-            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-          >
-            {sidebarCollapsed ? '→' : '←'}
-          </button>
-        </div>
-
-        {!sidebarCollapsed && (
+      <div className={`professional-chat ${darkMode ? 'dark' : 'light'} no-sidebar ${showCelebration ? 'celebration-mode-active' : ''}`}>
+        
+        {/* Enhanced Celebration Overlay */}
+        {showCelebration && (
           <>
-            <div className="conversations-section">
-              <h3>Conversations</h3>
-              <div className="conversations-list">
-                {conversations.map((conv) => (
-                  <div
-                    key={conv.id}
-                    className={`conversation-item ${currentConversation?.id === conv.id ? 'active' : ''}`}
-                    onClick={() => selectConversation(conv)}
-                  >
-                    <div className="conv-content">
-                      <div className="conv-title">{conv.title}</div>
-                      <div className="conv-date">
-                        {new Date(conv.created_at).toLocaleDateString()}
-                      </div>
-                    </div>
-                    <button 
-                      className="delete-btn"
-                      onClick={(e) => deleteConversation(conv.id, e)}
-                    >
-                      🗑️
-                    </button>
-                  </div>
-                ))}
+            {/* Full-Screen Animated Gradient Background */}
+            <div className="celebration-gradient-bg"></div>
+            
+            {/* Confetti Burst */}
+            <div className="celebration-confetti">
+              {[...Array(50)].map((_, i) => (
+                <div 
+                  key={i} 
+                  className={`confetti confetti-${i % 5}`}
+                  style={{
+                    left: `${Math.random() * 100}%`,
+                    animationDelay: `${Math.random() * 0.5}s`,
+                    animationDuration: `${3 + Math.random() * 2}s`
+                  }}
+                ></div>
+              ))}
+            </div>
+            
+            {/* Sparkle Particles */}
+            <div className="celebration-sparkles-enhanced">
+              {[...Array(20)].map((_, i) => (
+                <div 
+                  key={i} 
+                  className="sparkle-particle"
+                  style={{
+                    left: `${Math.random() * 100}%`,
+                    animationDelay: `${Math.random() * 2}s`,
+                    animationDuration: `${2 + Math.random() * 2}s`
+                  }}
+                >✨</div>
+              ))}
+            </div>
+            
+            {/* Celebration Banner */}
+            <div className="celebration-banner">
+              <div className="celebration-banner-content">
+                <span className="celebration-banner-icon">
+                  {celebrationEmotion === 'joy' ? '🎉' : '✨'}
+                </span>
+                <span className="celebration-banner-text">
+                  {celebrationEmotion === 'joy' 
+                    ? "You're glowing today!" 
+                    : "Happiness detected!"}
+                </span>
+                <span className="celebration-banner-icon">
+                  {celebrationEmotion === 'joy' ? '🎉' : '✨'}
+                </span>
               </div>
             </div>
           </>
         )}
-        </div>
+
+        {/* Fireworks Canvas Overlay */}
+        {showFireworks && (
+          <canvas 
+            ref={fireworksCanvasRef}
+            className="fireworks-canvas"
+          />
+        )}
 
         {/* Main Content */}
-        <div className="main-content">
+        <div className="main-content full-width">
         <div className="chat-header">
           <div className="header-left">
             <h2>{currentConversation?.title || 'Emotion Recognition Chat'}</h2>
@@ -462,7 +796,15 @@ const ProfessionalChatInterface = () => {
 
         <div className="chat-body">
           <div className="messages-area">
-            <div className="messages-container">
+            {/* Scroll Progress Indicator */}
+            <div className="scroll-progress-container">
+              <div 
+                className="scroll-progress-bar"
+                style={{ height: `${scrollProgress}%` }}
+              ></div>
+            </div>
+
+            <div className="messages-container" ref={messagesContainerRef}>
               {messages.length === 0 ? (
                 <div className="welcome-message">
                   <div className="welcome-icon">🤖</div>
