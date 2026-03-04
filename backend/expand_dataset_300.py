@@ -447,7 +447,7 @@ def add_tamil_idioms_batch(db):
             'usage_example': 'Encouraging someone to find joy',
             'story': 'Ancient Tamil recognition of laughter therapy'
         },
-        // Add 48 more joy idioms...
+       
     ]
     
     all_idioms = sadness_idioms + anger_idioms + joy_idioms
