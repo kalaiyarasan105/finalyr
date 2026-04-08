@@ -78,6 +78,42 @@ const RecommendationDisplay = ({ onBack }) => {
     }
   };
 
+  const handleRequestNew = async (category) => {
+    try {
+      const token = localStorage.getItem('token');
+      const headers = { 'Authorization': `Bearer ${token}` };
+
+      console.log(`Fetching new ${category} recommendation for ${currentEmotion}`);
+      
+      const response = await axios.get(
+        `http://localhost:8000/api/recommendations/${currentEmotion}/${category}`,
+        { headers }
+      );
+
+      if (response.data.recommendations && response.data.recommendations.length > 0) {
+        // Get current recommendations for this category
+        const currentRecs = recommendations[category] || [];
+        const newRecs = response.data.recommendations;
+        
+        // Find a recommendation that's not already displayed
+        const newRec = newRecs.find(rec => 
+          !currentRecs.some(current => current.id === rec.id)
+        ) || newRecs[0]; // Fallback to first if all are already shown
+
+        // Append the new recommendation to the existing list
+        setRecommendations({
+          ...recommendations,
+          [category]: [...currentRecs, newRec]
+        });
+
+        console.log(`Added new ${category} recommendation`);
+      }
+    } catch (err) {
+      console.error(`Error fetching new ${category} recommendation:`, err);
+      // Silently fail - user already got feedback that we're trying
+    }
+  };
+
   const renderRecommendations = (type, items) => {
     if (!items || items.length === 0) return null;
 
@@ -97,10 +133,10 @@ const RecommendationDisplay = ({ onBack }) => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
             >
-              {type === 'siddha' && <SiddhaRemedyCard remedy={item} />}
-              {type === 'idioms' && <TamilIdiomCard idiom={item} />}
-              {type === 'quotes' && <MotivationalQuoteCard quote={item} />}
-              {type === 'music' && <MusicPlayerCard track={item} />}
+              {type === 'siddha' && <SiddhaRemedyCard remedy={item} onRequestNew={handleRequestNew} />}
+              {type === 'idioms' && <TamilIdiomCard idiom={item} onRequestNew={handleRequestNew} />}
+              {type === 'quotes' && <MotivationalQuoteCard quote={item} onRequestNew={handleRequestNew} />}
+              {type === 'music' && <MusicPlayerCard track={item} onRequestNew={handleRequestNew} />}
             </motion.div>
           ))}
         </div>

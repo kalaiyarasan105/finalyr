@@ -10,6 +10,7 @@ import RecommendationSelector from './RecommendationSelector';
 import RecommendationDisplay from './RecommendationDisplay';
 import ColorTherapy from './ColorTherapy';
 import useRecommendationStore from '../store/recommendationStore';
+import useVoiceInteraction from '../hooks/useVoiceInteraction';
 
 const ProfessionalChatInterface = ({ selectedConversation }) => {
   const webcamRef = useRef(null);
@@ -42,6 +43,22 @@ const ProfessionalChatInterface = ({ selectedConversation }) => {
     resetRecommendations 
   } = useRecommendationStore();
 
+  // Voice interaction hook
+  const {
+    isListening,
+    isSpeaking,
+    transcript,
+    isSupported: isVoiceSupported,
+    startListening,
+    stopListening,
+    speak,
+    stopSpeaking,
+    clearTranscript
+  } = useVoiceInteraction();
+
+  // Track which message is currently being spoken
+  const [speakingMessageId, setSpeakingMessageId] = useState(null);
+
   useEffect(() => {
     loadConversations();
     // Load theme preference and apply to entire app
@@ -52,6 +69,13 @@ const ProfessionalChatInterface = ({ selectedConversation }) => {
       document.documentElement.classList.add('dark');
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Update text input when voice transcript changes
+  useEffect(() => {
+    if (transcript) {
+      setUserText(transcript);
+    }
+  }, [transcript]);
 
   // Handle selectedConversation prop from history page
   useEffect(() => {
@@ -657,6 +681,39 @@ const ProfessionalChatInterface = ({ selectedConversation }) => {
     }
   };
 
+  // Voice input handlers
+  const handleMicrophoneClick = () => {
+    if (isListening) {
+      stopListening();
+    } else {
+      clearTranscript();
+      startListening();
+    }
+  };
+
+  // Voice output handler for AI messages
+  const handleSpeakMessage = (messageId, messageContent) => {
+    if (speakingMessageId === messageId && isSpeaking) {
+      // Stop if already speaking this message
+      stopSpeaking();
+      setSpeakingMessageId(null);
+    } else {
+      // Stop any current speech and start new one
+      stopSpeaking();
+      setSpeakingMessageId(messageId);
+      speak(messageContent, {
+        rate: 0.95, // Slightly slower for clarity
+        pitch: 1.0,
+        volume: 1.0
+      });
+      
+      // Clear speaking state when done
+      setTimeout(() => {
+        setSpeakingMessageId(null);
+      }, messageContent.length * 50); // Rough estimate of speech duration
+    }
+  };
+
   const getEmotionIcon = (emotion) => {
     const icons = {
       joy: '😊',
@@ -839,6 +896,17 @@ const ProfessionalChatInterface = ({ selectedConversation }) => {
                         <div className="message-bubble">
                           <div className="message-text">{message.content}</div>
                           <div className="message-time">{formatTime(message.created_at)}</div>
+                          
+                          {/* Voice output button for AI messages */}
+                          {!message.is_user_message && isVoiceSupported && (
+                            <button
+                              className={`voice-output-btn ${speakingMessageId === message.id && isSpeaking ? 'speaking' : ''}`}
+                              onClick={() => handleSpeakMessage(message.id, message.content)}
+                              title={speakingMessageId === message.id && isSpeaking ? 'Stop speaking' : 'Read aloud'}
+                            >
+                              {speakingMessageId === message.id && isSpeaking ? '🔇' : '🔊'}
+                            </button>
+                          )}
                         </div>
                         
                         {message.is_user_message && message.final_emotion && (
@@ -939,11 +1007,31 @@ const ProfessionalChatInterface = ({ selectedConversation }) => {
                   value={userText}
                   onChange={(e) => setUserText(e.target.value)}
                   onKeyPress={handleKeyPress}
-                  placeholder="Share your thoughts or feelings..."
+                  placeholder={isListening ? "Listening... Speak now!" : "Share your thoughts or feelings..."}
                   disabled={loading}
-                  className="message-input"
+                  className={`message-input ${isListening ? 'listening' : ''}`}
                   rows="1"
                 />
+                
+                {/* Voice Input Button */}
+                {isVoiceSupported && (
+                  <button
+                    onClick={handleMicrophoneClick}
+                    disabled={loading}
+                    className={`voice-input-btn ${isListening ? 'listening' : ''}`}
+                    title={isListening ? 'Stop listening' : 'Start voice input'}
+                  >
+                    <span className="mic-icon">🎤</span>
+                    {isListening && (
+                      <span className="listening-indicator">
+                        <span className="pulse"></span>
+                        <span className="pulse"></span>
+                        <span className="pulse"></span>
+                      </span>
+                    )}
+                  </button>
+                )}
+                
                 <button 
                   onClick={sendMessage} 
                   disabled={loading || (!userText.trim() && !showWebcam)} 
@@ -956,6 +1044,20 @@ const ProfessionalChatInterface = ({ selectedConversation }) => {
                   )}
                 </button>
               </div>
+              
+              {/* Voice status indicator */}
+              {isListening && (
+                <div className="voice-status">
+                  <span className="status-icon">🎤</span>
+                  <span className="status-text">Listening... Speak clearly</span>
+                  <button 
+                    onClick={stopListening}
+                    className="stop-listening-btn"
+                  >
+                    Stop
+                  </button>
+                </div>
+              )}
             </div>
           </div>
 
