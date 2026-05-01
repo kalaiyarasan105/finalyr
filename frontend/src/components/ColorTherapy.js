@@ -9,7 +9,11 @@ const ColorTherapy = ({ children }) => {
 
   // Don't apply color therapy if disabled or no theme set
   if (!userPreferences.enableColorTherapy || !colorTheme) {
-    return <div className="min-h-screen bg-gray-50">{children}</div>;
+    return (
+      <div className="min-h-screen w-full bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-1000">
+        {children}
+      </div>
+    );
   }
 
   // Build gradient string safely
@@ -19,13 +23,13 @@ const ColorTherapy = ({ children }) => {
 
   return (
     <motion.div
-      className="min-h-screen transition-all duration-1000 ease-in-out"
+      className="min-h-screen w-full transition-all duration-1000 ease-in-out"
       animate={{
         background: gradientBackground
       }}
       transition={{ duration: 2 }}
     >
-      <div className="min-h-screen backdrop-blur-sm bg-white bg-opacity-30">
+      <div className="min-h-screen w-full backdrop-blur-md bg-white/20 dark:bg-gray-900/40 transition-colors duration-1000">
         {children}
       </div>
     </motion.div>
