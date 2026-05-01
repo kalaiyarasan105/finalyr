@@ -11,6 +11,8 @@ import RecommendationDisplay from './RecommendationDisplay';
 import ColorTherapy from './ColorTherapy';
 import useRecommendationStore from '../store/recommendationStore';
 import useVoiceInteraction from '../hooks/useVoiceInteraction';
+import VoiceToVoice from './VoiceToVoice';
+import MentalHealthAlert from './MentalHealthAlert';
 
 const ProfessionalChatInterface = ({ selectedConversation }) => {
   const webcamRef = useRef(null);
@@ -35,6 +37,7 @@ const ProfessionalChatInterface = ({ selectedConversation }) => {
   const [showCelebration, setShowCelebration] = useState(false);
   const [celebrationEmotion, setCelebrationEmotion] = useState(null);
   const [showFireworks, setShowFireworks] = useState(false);
+  const [positiveTheme, setPositiveTheme] = useState(false);
   const fireworksCanvasRef = useRef(null);
   const { 
     setCurrentEmotion, 
@@ -58,6 +61,12 @@ const ProfessionalChatInterface = ({ selectedConversation }) => {
 
   // Track which message is currently being spoken
   const [speakingMessageId, setSpeakingMessageId] = useState(null);
+
+  // Live voice-to-voice modal
+  const [showVoiceToVoice, setShowVoiceToVoice] = useState(false);
+
+  // Mental health alert state
+  const [mentalHealthAlert, setMentalHealthAlert] = useState(null);
 
   useEffect(() => {
     loadConversations();
@@ -554,6 +563,14 @@ const ProfessionalChatInterface = ({ selectedConversation }) => {
       setMessages(prev => [...prev, userMessage, botMessage]);
       setUserText('');
       
+      // Silently update mental health alert (does not affect chat flow)
+      if (response.mental_health_alert) {
+        if (response.mental_health_alert.risk_detected) {
+          setMentalHealthAlert(response.mental_health_alert);
+        }
+        // If risk clears, leave existing alert visible until user dismisses it
+      }
+
       // Trigger recommendations for negative emotions
       const negativeEmotions = ['sadness', 'sad', 'anger', 'angry', 'fear', 'fearful', 'disgust', 'disgusted'];
       const positiveEmotions = ['joy', 'happy'];
@@ -581,15 +598,20 @@ const ProfessionalChatInterface = ({ selectedConversation }) => {
         setCelebrationEmotion(detectedEmotion);
         setShowCelebration(true);
         setShowFireworks(true); // Trigger fireworks animation
+        setPositiveTheme(true); // Apply positive theme to entire page
         
-        // Auto-hide celebration after 5 seconds
+        // Auto-hide celebration after 5 seconds, keep theme a bit longer
         setTimeout(() => {
           setShowCelebration(false);
         }, 5000);
+        setTimeout(() => {
+          setPositiveTheme(false); // Smoothly revert theme after 8 seconds
+        }, 8000);
       } else {
         // Hide celebration if emotion changes to non-positive
         setShowCelebration(false);
         setShowFireworks(false);
+        setPositiveTheme(false);
       }
       
       // Refresh conversations to update the list
@@ -743,7 +765,7 @@ const ProfessionalChatInterface = ({ selectedConversation }) => {
 
   return (
     <ColorTherapy>
-      <div className={`professional-chat ${darkMode ? 'dark' : 'light'} no-sidebar ${showCelebration ? 'celebration-mode-active' : ''}`}>
+      <div className={`professional-chat ${darkMode ? 'dark' : 'light'} no-sidebar ${showCelebration ? 'celebration-mode-active' : ''} ${positiveTheme ? 'positive-emotion-theme' : ''}`}>
         
         {/* Enhanced Celebration Overlay */}
         {showCelebration && (
@@ -819,6 +841,14 @@ const ProfessionalChatInterface = ({ selectedConversation }) => {
           </div>
           <div className="header-right">
             <div className="header-controls">
+              <button 
+                onClick={() => setShowVoiceToVoice(true)} 
+                className="header-btn voice-live-btn"
+                title="Live Voice Conversation"
+              >
+                🎙️ Live Voice
+              </button>
+
               <button 
                 onClick={createNewConversation} 
                 className="header-btn primary"
@@ -998,6 +1028,13 @@ const ProfessionalChatInterface = ({ selectedConversation }) => {
                   </React.Fragment>
                 ))
               )}
+
+              {/* Mental health support alert — silent background feature */}
+              <MentalHealthAlert
+                alert={mentalHealthAlert}
+                onDismiss={() => setMentalHealthAlert(null)}
+              />
+
               <div ref={messagesEndRef} />
             </div>
 
@@ -1107,6 +1144,15 @@ const ProfessionalChatInterface = ({ selectedConversation }) => {
         </div>
         </div>
       </div>
+      {/* Live Voice-to-Voice Modal */}
+      {showVoiceToVoice && (
+        <VoiceToVoice
+          onClose={() => setShowVoiceToVoice(false)}
+          currentConversation={currentConversation}
+          webcamRef={webcamRef}
+          showWebcam={showWebcam}
+        />
+      )}
     </ColorTherapy>
   );
 };

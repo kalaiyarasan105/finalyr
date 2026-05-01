@@ -606,6 +606,25 @@
   background: var(--bg-tertiary);
 }
 
+/* Live Voice button */
+.header-btn.voice-live-btn {
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  color: white;
+  box-shadow: 0 2px 10px rgba(99,102,241,0.35);
+  animation: vtv-btn-pulse 2.5s ease-in-out infinite;
+}
+
+.header-btn.voice-live-btn:hover {
+  background: linear-gradient(135deg, #4338ca, #6d28d9);
+  box-shadow: 0 4px 16px rgba(99,102,241,0.55);
+  animation: none;
+}
+
+@keyframes vtv-btn-pulse {
+  0%, 100% { box-shadow: 0 2px 10px rgba(99,102,241,0.35); }
+  50%       { box-shadow: 0 2px 18px rgba(99,102,241,0.6); }
+}
+
 
 .chat-body {
   flex: 1;
@@ -1975,4 +1994,241 @@
 .voice-output-btn:hover::after {
   opacity: 1;
   transform: translateX(-50%) translateY(-12px);
+}
+
+/* ===== Positive Emotion Theme ===== */
+/* Applied to the entire page when joy/happy is detected */
+.professional-chat.positive-emotion-theme {
+  --bg-primary: #fffbeb;
+  --bg-secondary: #fef9c3;
+  --bg-tertiary: #fde68a;
+  --bg-hover: #fcd34d;
+
+  --text-primary: #78350f;
+  --text-secondary: #92400e;
+  --text-muted: #b45309;
+
+  --border-color: #fcd34d;
+  --border-hover: #f59e0b;
+
+  --primary-color: #f59e0b;
+  --primary-hover: #d97706;
+  --accent-color: #10b981;
+
+  --shadow-sm: 0 1px 2px 0 rgb(245 158 11 / 0.15);
+  --shadow-md: 0 4px 6px -1px rgb(245 158 11 / 0.2), 0 2px 4px -2px rgb(245 158 11 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(245 158 11 / 0.2), 0 4px 6px -4px rgb(245 158 11 / 0.1);
+
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 50%, #fde68a 100%);
+  transition: all 0.8s ease;
+}
+
+/* Header in positive theme */
+.professional-chat.positive-emotion-theme .chat-header {
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  border-bottom-color: #fcd34d;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.2);
+  transition: background 0.8s ease, border-color 0.8s ease, box-shadow 0.8s ease;
+}
+
+/* Sidebar in positive theme */
+.professional-chat.positive-emotion-theme .sidebar {
+  background: #fffbeb;
+  border-right-color: #fcd34d;
+  transition: background 0.8s ease, border-color 0.8s ease;
+}
+
+.professional-chat.positive-emotion-theme .sidebar-header {
+  background: #fef3c7;
+  border-bottom-color: #fcd34d;
+  transition: background 0.8s ease;
+}
+
+/* Messages area */
+.professional-chat.positive-emotion-theme .messages-area {
+  background: linear-gradient(180deg, #fffbeb 0%, #fef9c3 100%);
+  transition: background 0.8s ease;
+}
+
+.professional-chat.positive-emotion-theme .messages-container {
+  background: transparent;
+}
+
+/* Bot message bubbles */
+.professional-chat.positive-emotion-theme .message.bot .message-bubble {
+  background: #fef3c7;
+  border: 1px solid #fcd34d;
+  color: #78350f;
+  transition: background 0.8s ease, border-color 0.8s ease;
+}
+
+/* User message bubbles */
+.professional-chat.positive-emotion-theme .message.user .message-bubble {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #fff;
+  transition: background 0.8s ease;
+}
+
+/* Input area */
+.professional-chat.positive-emotion-theme .input-area,
+.professional-chat.positive-emotion-theme .chat-input-area {
+  background: #fef3c7;
+  border-top-color: #fcd34d;
+  transition: background 0.8s ease, border-color 0.8s ease;
+}
+
+.professional-chat.positive-emotion-theme .message-input {
+  background: #fffbeb;
+  border-color: #fcd34d;
+  color: #78350f;
+  transition: background 0.8s ease, border-color 0.8s ease;
+}
+
+.professional-chat.positive-emotion-theme .message-input:focus {
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
+}
+
+/* Webcam panel */
+.professional-chat.positive-emotion-theme .webcam-panel {
+  background: #fffbeb;
+  border-left-color: #fcd34d;
+  transition: background 0.8s ease, border-color 0.8s ease;
+}
+
+/* Status indicator */
+.professional-chat.positive-emotion-theme .status-indicator {
+  background: #fde68a;
+  color: #92400e;
+}
+
+/* Dark mode: positive theme uses deeper warm tones */
+.dark-theme .professional-chat.positive-emotion-theme,
+.professional-chat.positive-emotion-theme.dark {
+  --bg-primary: #1c1408;
+  --bg-secondary: #2d1f0a;
+  --bg-tertiary: #3d2b0e;
+  --bg-hover: #4d3612;
+  --text-primary: #fde68a;
+  --text-secondary: #fcd34d;
+  --text-muted: #f59e0b;
+  --border-color: #4d3612;
+  --border-hover: #6b4c1a;
+  background: linear-gradient(135deg, #1c1408 0%, #2d1f0a 50%, #3d2b0e 100%);
+}
+
+/* ============================================================
+   Mental Health Alert Banner
+   ============================================================ */
+
+.mental-health-alert {
+  margin: 0.75rem 1rem 0.25rem;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+  border: 1px solid #fcd34d;
+  box-shadow: 0 2px 8px rgba(251, 191, 36, 0.15);
+  overflow: hidden;
+  animation: mha-slide-in 0.35s ease;
+}
+
+.dark .mental-health-alert {
+  background: linear-gradient(135deg, #2d2a1a 0%, #3a3010 100%);
+  border-color: #92400e;
+}
+
+@keyframes mha-slide-in {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.mha-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding: 0.85rem 1rem;
+}
+
+.mha-icon {
+  font-size: 1.2rem;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.mha-message {
+  flex: 1;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: #78350f;
+  margin: 0;
+}
+
+.dark .mha-message {
+  color: #fde68a;
+}
+
+.mha-dismiss {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #a16207;
+  font-size: 0.8rem;
+  padding: 2px 4px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.mha-dismiss:hover {
+  opacity: 1;
+}
+
+.mha-toggle {
+  display: block;
+  width: 100%;
+  background: none;
+  border: none;
+  border-top: 1px solid #fcd34d;
+  padding: 0.5rem 1rem;
+  font-size: 0.78rem;
+  color: #92400e;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s;
+}
+
+.dark .mha-toggle {
+  border-top-color: #92400e;
+  color: #fbbf24;
+}
+
+.mha-toggle:hover {
+  background: rgba(251, 191, 36, 0.15);
+}
+
+.mha-suggestions {
+  list-style: none;
+  margin: 0;
+  padding: 0.5rem 1rem 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.mha-suggestion-item {
+  display: flex;
+  gap: 0.5rem;
+  font-size: 0.82rem;
+  color: #78350f;
+  line-height: 1.45;
+}
+
+.dark .mha-suggestion-item {
+  color: #fde68a;
+}
+
+.mha-bullet {
+  flex-shrink: 0;
+  color: #f59e0b;
+  font-weight: bold;
 }

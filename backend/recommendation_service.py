@@ -16,36 +16,36 @@ class RecommendationService:
         emotion: str, 
         category: str, 
         user_id: Optional[int] = None,
-        limit: int = 5
+        limit: int = 5,
+        exclude_ids: Optional[set] = None
     ) -> List[Dict]:
         """
         Get recommendations by emotion and category
-        
+
         Args:
             emotion: Detected emotion (sadness, anger, anxiety, etc.)
             category: siddha, idioms, quotes, music, or all
             user_id: Optional user ID for personalization
             limit: Number of recommendations to return
-            
-        Returns:
-            List of recommendation dictionaries
+            exclude_ids: Set of IDs to skip (already seen / disliked)
         """
+        exclude_ids = exclude_ids or set()
         recommendations = []
         
         if category == 'siddha' or category == 'all':
-            siddha_recs = self.get_siddha_remedies(emotion, limit)
+            siddha_recs = self.get_siddha_remedies(emotion, limit, exclude_ids)
             recommendations.extend(siddha_recs)
         
         if category == 'idioms' or category == 'all':
-            idiom_recs = self.get_tamil_idioms(emotion, limit)
+            idiom_recs = self.get_tamil_idioms(emotion, limit, exclude_ids)
             recommendations.extend(idiom_recs)
         
         if category == 'quotes' or category == 'all':
-            quote_recs = self.get_motivational_quotes(emotion, limit)
+            quote_recs = self.get_motivational_quotes(emotion, limit, exclude_ids)
             recommendations.extend(quote_recs)
         
         if category == 'music' or category == 'all':
-            music_recs = self.get_music_tracks(emotion, limit)
+            music_recs = self.get_music_tracks(emotion, limit, exclude_ids)
             recommendations.extend(music_recs)
         
         # Personalize based on user preferences if user_id provided
@@ -54,11 +54,12 @@ class RecommendationService:
         
         return recommendations
     
-    def get_siddha_remedies(self, emotion: str, limit: int = 5) -> List[Dict]:
+    def get_siddha_remedies(self, emotion: str, limit: int = 5, exclude_ids: Optional[set] = None) -> List[Dict]:
         """Get Siddha remedies for specific emotion"""
-        remedies = self.db.query(SiddhaRemedy).filter(
-            SiddhaRemedy.emotion == emotion
-        ).limit(limit).all()
+        query = self.db.query(SiddhaRemedy).filter(SiddhaRemedy.emotion == emotion)
+        if exclude_ids:
+            query = query.filter(~SiddhaRemedy.id.in_(exclude_ids))
+        remedies = query.limit(limit).all()
         
         return [{
             'id': r.id,
@@ -77,11 +78,12 @@ class RecommendationService:
             'video_guide_url': r.video_guide_url
         } for r in remedies]
     
-    def get_tamil_idioms(self, emotion: str, limit: int = 5) -> List[Dict]:
+    def get_tamil_idioms(self, emotion: str, limit: int = 5, exclude_ids: Optional[set] = None) -> List[Dict]:
         """Get Tamil idioms for specific emotion"""
-        idioms = self.db.query(TamilIdiom).filter(
-            TamilIdiom.emotion == emotion
-        ).limit(limit).all()
+        query = self.db.query(TamilIdiom).filter(TamilIdiom.emotion == emotion)
+        if exclude_ids:
+            query = query.filter(~TamilIdiom.id.in_(exclude_ids))
+        idioms = query.limit(limit).all()
         
         return [{
             'id': i.id,
@@ -96,11 +98,12 @@ class RecommendationService:
             'audio_url': i.audio_url
         } for i in idioms]
     
-    def get_motivational_quotes(self, emotion: str, limit: int = 5) -> List[Dict]:
+    def get_motivational_quotes(self, emotion: str, limit: int = 5, exclude_ids: Optional[set] = None) -> List[Dict]:
         """Get motivational quotes for specific emotion"""
-        quotes = self.db.query(MotivationalQuote).filter(
-            MotivationalQuote.emotion == emotion
-        ).limit(limit).all()
+        query = self.db.query(MotivationalQuote).filter(MotivationalQuote.emotion == emotion)
+        if exclude_ids:
+            query = query.filter(~MotivationalQuote.id.in_(exclude_ids))
+        quotes = query.limit(limit).all()
         
         return [{
             'id': q.id,
@@ -119,11 +122,12 @@ class RecommendationService:
             'shareable': q.shareable
         } for q in quotes]
     
-    def get_music_tracks(self, emotion: str, limit: int = 5) -> List[Dict]:
+    def get_music_tracks(self, emotion: str, limit: int = 5, exclude_ids: Optional[set] = None) -> List[Dict]:
         """Get music tracks for specific emotion"""
-        tracks = self.db.query(MusicTrack).filter(
-            MusicTrack.emotion == emotion
-        ).limit(limit).all()
+        query = self.db.query(MusicTrack).filter(MusicTrack.emotion == emotion)
+        if exclude_ids:
+            query = query.filter(~MusicTrack.id.in_(exclude_ids))
+        tracks = query.limit(limit).all()
         
         return [{
             'id': t.id,

@@ -31,6 +31,7 @@ from wellness_service import wellness_engine
 from mood_journal_service import mood_journal_service
 from analytics import AnalyticsService
 from config import settings
+from mental_health_monitor import record_emotion, assess_risk
 
 # Create database tables
 Base.metadata.create_all(bind=engine)
@@ -392,7 +393,14 @@ async def predict_emotion(
             "timeframe": getattr(rec, 'timeframe', 'immediate')
         } for rec in wellness_recommendations
     ]
-    
+
+    # --- Mental health risk monitoring (silent background check) ---
+    if prediction.get("final_emotion"):
+        record_emotion(current_user.id, prediction["final_emotion"])
+        prediction["mental_health_alert"] = assess_risk(current_user.id)
+    else:
+        prediction["mental_health_alert"] = {"risk_detected": False}
+
     return prediction
 
 @app.post("/predict_multimodal", response_model=EmotionPrediction)
@@ -834,26 +842,37 @@ async def get_recommendations(
     emotion: str,
     category: str,
     limit: int = 5,
+    exclude_ids: str = "",          # comma-separated track IDs to skip
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
     Get recommendations by emotion and category
-    
+
     Args:
         emotion: Detected emotion (sadness, anger, anxiety, etc.)
         category: siddha, idioms, quotes, music, or all
         limit: Number of recommendations to return
+        exclude_ids: Comma-separated IDs to exclude (already seen / disliked)
     """
     try:
+        # Parse excluded IDs
+        excluded = set()
+        if exclude_ids:
+            for part in exclude_ids.split(","):
+                part = part.strip()
+                if part.isdigit():
+                    excluded.add(int(part))
+
         rec_service = get_recommendation_service(db)
         recommendations = rec_service.get_recommendations_by_category(
             emotion=emotion,
             category=category,
             user_id=current_user.id,
-            limit=limit
+            limit=limit + len(excluded),   # fetch extra so we have room to exclude
+            exclude_ids=excluded
         )
-        
+
         return {
             'emotion': emotion,
             'category': category,

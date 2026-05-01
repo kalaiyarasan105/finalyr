@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 import useRecommendationStore from '../store/recommendationStore';
@@ -18,6 +18,8 @@ const RecommendationDisplay = ({ onBack }) => {
   } = useRecommendationStore();
 
   const [error, setError] = useState(null);
+  // Track IDs the user has disliked this session so we never show them again
+  const dislikedIds = useRef({});   // { music: Set<id>, siddha: Set<id>, ... }
 
   useEffect(() => {
     fetchRecommendations();
@@ -78,39 +80,49 @@ const RecommendationDisplay = ({ onBack }) => {
     }
   };
 
-  const handleRequestNew = async (category) => {
+  const handleRequestNew = async (category, dislikedId) => {
     try {
       const token = localStorage.getItem('token');
       const headers = { 'Authorization': `Bearer ${token}` };
 
-      console.log(`Fetching new ${category} recommendation for ${currentEmotion}`);
-      
+      // Record this ID as disliked so it's never shown again this session
+      if (dislikedId != null) {
+        if (!dislikedIds.current[category]) {
+          dislikedIds.current[category] = new Set();
+        }
+        dislikedIds.current[category].add(dislikedId);
+      }
+
+      // Build the exclude list: all IDs currently displayed + all disliked ones
+      const currentRecs = recommendations[category] || [];
+      const shownIds = currentRecs.map(r => r.id).filter(Boolean);
+      const dislikedSet = dislikedIds.current[category] || new Set();
+      const allExcluded = [...new Set([...shownIds, ...dislikedSet])];
+      const excludeParam = allExcluded.join(',');
+
       const response = await axios.get(
         `http://localhost:8000/api/recommendations/${currentEmotion}/${category}`,
-        { headers }
+        { headers, params: { exclude_ids: excludeParam, limit: 1 } }
       );
 
       if (response.data.recommendations && response.data.recommendations.length > 0) {
-        // Get current recommendations for this category
-        const currentRecs = recommendations[category] || [];
-        const newRecs = response.data.recommendations;
-        
-        // Find a recommendation that's not already displayed
-        const newRec = newRecs.find(rec => 
-          !currentRecs.some(current => current.id === rec.id)
-        ) || newRecs[0]; // Fallback to first if all are already shown
+        const newRec = response.data.recommendations[0];
 
-        // Append the new recommendation to the existing list
-        setRecommendations({
-          ...recommendations,
-          [category]: [...currentRecs, newRec]
-        });
+        // Replace the disliked card with the new one (keep list length stable)
+        const updatedRecs = dislikedId != null
+          ? currentRecs.map(r => (r.id === dislikedId ? newRec : r))
+          : [...currentRecs, newRec];
 
-        console.log(`Added new ${category} recommendation`);
+        setRecommendations({ ...recommendations, [category]: updatedRecs });
+      } else {
+        // No more unique tracks available — remove the disliked card and show a message
+        const updatedRecs = dislikedId != null
+          ? currentRecs.filter(r => r.id !== dislikedId)
+          : currentRecs;
+        setRecommendations({ ...recommendations, [category]: updatedRecs });
       }
     } catch (err) {
       console.error(`Error fetching new ${category} recommendation:`, err);
-      // Silently fail - user already got feedback that we're trying
     }
   };
 
@@ -133,10 +145,10 @@ const RecommendationDisplay = ({ onBack }) => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
             >
-              {type === 'siddha' && <SiddhaRemedyCard remedy={item} onRequestNew={handleRequestNew} />}
-              {type === 'idioms' && <TamilIdiomCard idiom={item} onRequestNew={handleRequestNew} />}
-              {type === 'quotes' && <MotivationalQuoteCard quote={item} onRequestNew={handleRequestNew} />}
-              {type === 'music' && <MusicPlayerCard track={item} onRequestNew={handleRequestNew} />}
+              {type === 'siddha' && <SiddhaRemedyCard remedy={item} onRequestNew={(cat) => handleRequestNew(cat, item.id)} />}
+              {type === 'idioms' && <TamilIdiomCard idiom={item} onRequestNew={(cat) => handleRequestNew(cat, item.id)} />}
+              {type === 'quotes' && <MotivationalQuoteCard quote={item} onRequestNew={(cat) => handleRequestNew(cat, item.id)} />}
+              {type === 'music' && <MusicPlayerCard track={item} onRequestNew={(cat) => handleRequestNew(cat, item.id)} />}
             </motion.div>
           ))}
         </div>
