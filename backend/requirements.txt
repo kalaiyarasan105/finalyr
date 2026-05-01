@@ -6,10 +6,12 @@ passlib[bcrypt]>=1.7.4
 sqlalchemy>=2.0.0
 python-dotenv>=1.0.0
 transformers>=4.30.0
+# CPU-only torch — much smaller than the default CUDA build (~800MB vs ~2.5GB)
+--extra-index-url https://download.pytorch.org/whl/cpu
 torch>=2.0.0
 torchvision>=0.15.0
 Pillow>=9.0.0
 numpy>=1.21.0
-opencv-python>=4.5.0
+opencv-python-headless>=4.5.0
 pydantic>=2.0.0
 pydantic-settings>=2.0.0

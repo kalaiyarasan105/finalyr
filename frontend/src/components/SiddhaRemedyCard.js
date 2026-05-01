@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
+import API_BASE_URL from '../api/config';
 
 const SiddhaRemedyCard = ({ remedy, onRequestNew }) => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -19,7 +20,7 @@ const SiddhaRemedyCard = ({ remedy, onRequestNew }) => {
       formData.append('completed', 'true');
       formData.append('effectiveness_rating', helpful ? '5' : '2');
       
-      const response = await axios.post('http://localhost:8000/api/recommendations/feedback', formData, {
+      const response = await axios.post(`${API_BASE_URL}/api/recommendations/feedback`, formData, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
           'Content-Type': 'multipart/form-data'

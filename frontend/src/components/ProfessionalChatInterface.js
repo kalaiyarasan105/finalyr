@@ -13,6 +13,7 @@ import useRecommendationStore from '../store/recommendationStore';
 import useVoiceInteraction from '../hooks/useVoiceInteraction';
 import VoiceToVoice from './VoiceToVoice';
 import MentalHealthAlert from './MentalHealthAlert';
+import API_BASE_URL from '../api/config';
 
 const ProfessionalChatInterface = ({ selectedConversation }) => {
   const webcamRef = useRef(null);
@@ -647,7 +648,7 @@ const ProfessionalChatInterface = ({ selectedConversation }) => {
       // Fetch color theme for this emotion
       const token = localStorage.getItem('token');
       const response = await axios.get(
-        `http://localhost:8000/api/recommendations/color-theme/${apiEmotion}`,
+        `${API_BASE_URL}/api/recommendations/color-theme/${apiEmotion}`,
         { headers: { 'Authorization': `Bearer ${token}` } }
       );
       

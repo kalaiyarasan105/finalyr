@@ -6,6 +6,7 @@ import SiddhaRemedyCard from './SiddhaRemedyCard';
 import TamilIdiomCard from './TamilIdiomCard';
 import MotivationalQuoteCard from './MotivationalQuoteCard';
 import MusicPlayerCard from './MusicPlayerCard';
+import API_BASE_URL from '../api/config';
 
 const RecommendationDisplay = ({ onBack }) => {
   const {
@@ -40,10 +41,10 @@ const RecommendationDisplay = ({ onBack }) => {
       if (selectedCategory === 'all') {
         // Fetch all categories
         const [siddha, idioms, quotes, music] = await Promise.all([
-          axios.get(`http://localhost:8000/api/recommendations/${currentEmotion}/siddha`, { headers }).catch(e => ({ data: { recommendations: [] } })),
-          axios.get(`http://localhost:8000/api/recommendations/${currentEmotion}/idioms`, { headers }).catch(e => ({ data: { recommendations: [] } })),
-          axios.get(`http://localhost:8000/api/recommendations/${currentEmotion}/quotes`, { headers }).catch(e => ({ data: { recommendations: [] } })),
-          axios.get(`http://localhost:8000/api/recommendations/${currentEmotion}/music`, { headers }).catch(e => ({ data: { recommendations: [] } }))
+          axios.get(`${API_BASE_URL}/api/recommendations/${currentEmotion}/siddha`, { headers }).catch(e => ({ data: { recommendations: [] } })),
+          axios.get(`${API_BASE_URL}/api/recommendations/${currentEmotion}/idioms`, { headers }).catch(e => ({ data: { recommendations: [] } })),
+          axios.get(`${API_BASE_URL}/api/recommendations/${currentEmotion}/quotes`, { headers }).catch(e => ({ data: { recommendations: [] } })),
+          axios.get(`${API_BASE_URL}/api/recommendations/${currentEmotion}/music`, { headers }).catch(e => ({ data: { recommendations: [] } }))
         ]);
 
         console.log('All recommendations fetched:', {
@@ -63,7 +64,7 @@ const RecommendationDisplay = ({ onBack }) => {
         // Fetch single category
         console.log(`Fetching ${selectedCategory} for ${currentEmotion}`);
         const response = await axios.get(
-          `http://localhost:8000/api/recommendations/${currentEmotion}/${selectedCategory}`,
+          `${API_BASE_URL}/api/recommendations/${currentEmotion}/${selectedCategory}`,
           { headers }
         );
         console.log(`${selectedCategory} response:`, response.data);
@@ -101,7 +102,7 @@ const RecommendationDisplay = ({ onBack }) => {
       const excludeParam = allExcluded.join(',');
 
       const response = await axios.get(
-        `http://localhost:8000/api/recommendations/${currentEmotion}/${category}`,
+        `${API_BASE_URL}/api/recommendations/${currentEmotion}/${category}`,
         { headers, params: { exclude_ids: excludeParam, limit: 1 } }
       );
 
